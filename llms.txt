@@ -1,0 +1,71 @@
+# PocketBase
+
+> PocketBase is an open source backend consisting of embedded database (SQLite) with realtime subscriptions, built-in auth management, convenient dashboard UI and simple REST-ish API. It can be used as a standalone app or as a Go/JS framework library.
+
+## Overview
+
+- [Introduction](https://pocketbase.io/old/docs/): Core concepts and getting started with PocketBase.
+- [Collections](https://pocketbase.io/old/docs/collections/): Defining and managing database collections.
+- [API rules and filters](https://pocketbase.io/old/docs/api-rules-and-filters/): Security rules and filter expressions for data access control.
+- [Client-side SDKs](https://pocketbase.io/old/docs/client-side-sdks/): Official SDKs for JavaScript, Dart, and other languages.
+- [Authentication](https://pocketbase.io/old/docs/authentication/): User authentication with multiple providers.
+- [Files upload and handling](https://pocketbase.io/old/docs/files-handling/): Managing file uploads, storage, and retrieval.
+- [Working with relations](https://pocketbase.io/old/docs/working-with-relations/): Creating and managing relationships between collections.
+- [Use as framework](https://pocketbase.io/old/docs/use-as-framework/): Embedding PocketBase as a Go or JavaScript framework.
+- [Going to production](https://pocketbase.io/old/docs/going-to-production/): Deployment and production considerations.
+
+## API Reference
+
+- [Web APIs reference](https://pocketbase.io/old/docs/api-records/): Overview of available REST API endpoints.
+- [API Records](https://pocketbase.io/old/docs/api-records/): CRUD operations for collection records.
+- [API Realtime](https://pocketbase.io/old/docs/api-realtime/): WebSocket-based realtime subscriptions.
+- [API Files](https://pocketbase.io/old/docs/api-files/): File download and access endpoints.
+- [API Admins](https://pocketbase.io/old/docs/api-admins/): Admin authentication and management.
+- [API Collections](https://pocketbase.io/old/docs/api-collections/): Collection schema management.
+- [API Settings](https://pocketbase.io/old/docs/api-settings/): Application settings management.
+- [API Logs](https://pocketbase.io/old/docs/api-logs/): Request logs and statistics.
+- [API Backups](https://pocketbase.io/old/docs/api-backups/): Database backup operations.
+- [API Health](https://pocketbase.io/old/docs/api-health/): Health check endpoint.
+
+## Go Extensions
+
+- [Go Overview](https://pocketbase.io/old/docs/go-overview/): Introduction to extending PocketBase with Go.
+- [Go Event hooks](https://pocketbase.io/old/docs/go-event-hooks/): Event-driven hooks for customizing behavior.
+- [Go Routing](https://pocketbase.io/old/docs/go-routing/): Custom route registration and handling.
+- [Go Database](https://pocketbase.io/old/docs/go-database/): Direct database access and queries.
+- [Go Record operations](https://pocketbase.io/old/docs/go-records/): Programmatic record manipulation.
+- [Go Collection operations](https://pocketbase.io/old/docs/go-collections/): Managing collections programmatically.
+- [Go Migrations](https://pocketbase.io/old/docs/go-migrations/): Database schema migrations.
+- [Go Jobs scheduling](https://pocketbase.io/old/docs/go-jobs-scheduling/): Background job scheduling.
+- [Go Console commands](https://pocketbase.io/old/docs/go-console-commands/): Custom CLI commands.
+- [Go Sending emails](https://pocketbase.io/old/docs/go-sending-emails/): Email sending functionality.
+- [Go Rendering templates](https://pocketbase.io/old/docs/go-rendering-templates/): Server-side template rendering.
+- [Go Logging](https://pocketbase.io/old/docs/go-logging/): Custom logging and log hooks.
+- [Go Testing](https://pocketbase.io/old/docs/go-testing/): Testing utilities and strategies.
+- [Go Custom models](https://pocketbase.io/old/docs/go-custom-models/): Defining custom data models.
+
+## JavaScript Extensions
+
+- [JS Overview](https://pocketbase.io/old/docs/js-overview/): Introduction to extending PocketBase with JavaScript.
+- [JS Event hooks](https://pocketbase.io/old/docs/js-event-hooks/): Event-driven hooks in JavaScript.
+- [JS Routing](https://pocketbase.io/old/docs/js-routing/): Custom route registration in JavaScript.
+- [JS Database](https://pocketbase.io/old/docs/js-database/): Database access via JavaScript.
+- [JS Record operations](https://pocketbase.io/old/docs/js-records/): Record manipulation in JavaScript.
+- [JS Collection operations](https://pocketbase.io/old/docs/js-collections/): Collection management via JavaScript.
+- [JS Migrations](https://pocketbase.io/old/docs/js-migrations/): JavaScript-based migrations.
+- [JS Jobs scheduling](https://pocketbase.io/old/docs/js-jobs-scheduling/): Background jobs in JavaScript.
+- [JS Console commands](https://pocketbase.io/old/docs/js-console-commands/): Custom CLI commands in JavaScript.
+- [JS Sending emails](https://pocketbase.io/old/docs/js-sending-emails/): Email functionality in JavaScript.
+- [JS Sending HTTP requests](https://pocketbase.io/old/docs/js-sending-http-requests/): HTTP client for external APIs.
+- [JS Rendering templates](https://pocketbase.io/old/docs/js-rendering-templates/): Template rendering in JavaScript.
+- [JS Logging](https://pocketbase.io/old/docs/js-logging/): Logging utilities in JavaScript.
+
+## External Resources
+
+- [pb-ext - Enhanced PocketBase Server](https://raw.githubusercontent.com/magooney-loon/pb-ext/main/README.md): Extended PocketBase server with additional features.
+- [pb-ext - Scripts Documentation](https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/scripts/README.md): Documentation for pb-ext scripts.
+- [pb-ext - Collections Implementation](https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/collections.go): Example Go implementation of collections.
+- [pb-ext - Handlers Implementation](https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/handlers.go): Example Go handlers implementation.
+- [pb-ext - Jobs Implementation](https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/jobs.go): Example Go jobs implementation.
+- [pb-ext - Routes Implementation](https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/routes.go): Example Go routes implementation.
+- [pb-deployer - PocketBase Production Deployment](https://raw.githubusercontent.com/magooney-loon/pb-deployer/main/README.md): Production deployment tools for PocketBase.
