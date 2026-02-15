@@ -1,0 +1,105 @@
+================================================================================
+POCKETBASE DOCUMENTATION SCRAPING SUMMARY FOR LLM USAGE
+================================================================================
+Generated: 2026-02-15 17:47:51
+Total Sections: 40
+Purpose: LLM Training & Context Enhancement
+
+🤖 LLM USAGE STATISTICS
+================================================================================
+📊 Total Estimated Tokens: 67,439
+🔧 LLM-Ready Tokens: 77,952
+📈 Avg Tokens/Section: 1,948
+📖 Context Window Usage (120K): ~65.0%
+📖 Context Window Usage (200K): ~39.0%
+🎯 Compression Ratio: 115.6% (clean vs raw)
+
+📊 PROCESSING STATISTICS
+================================================================================
+✅ Successful: 40/40 sections (100.0%)
+❌ Failed: 0/40 sections (0.0%)
+
+📈 CONTENT INSIGHTS
+================================================================================
+📄 Largest Section: Extend with Go - Event hooks (10,285 tokens, 68,265 chars)
+📄 Smallest Section: Client-side SDKs (99 tokens, 613 chars)
+
+📂 CONTENT BY CATEGORY (with Token Analysis)
+================================================================================
+   Api: 11 sections, 44,846 tokens (57.5%), avg 4,076 tokens/section
+   Hooks: 18 sections, 24,691 tokens (31.7%), avg 1,371 tokens/section
+   Database: 2 sections, 2,273 tokens (2.9%), avg 1,136 tokens/section
+   Setup: 3 sections, 1,894 tokens (2.4%), avg 631 tokens/section
+   Auth: 1 sections, 1,479 tokens (1.9%), avg 1,479 tokens/section
+   Files: 1 sections, 1,338 tokens (1.7%), avg 1,338 tokens/section
+   General: 3 sections, 1,332 tokens (1.7%), avg 444 tokens/section
+   Sdk: 1 sections, 99 tokens (0.1%), avg 99 tokens/section
+
+📊 LEGACY STATISTICS
+================================================================================
+📝 Total content: 358,132 characters
+🔧 Total parameters: 358
+
+🌐 API METHODS FOUND
+================================================================================
+   POST: 1 endpoints
+   GET: 3 endpoints
+
+✅ SUCCESSFUL SECTIONS
+================================================================================
+[1] Introduction (291 tokens, 1725 chars, 0 params)
+[2] Collections (1,123 tokens, 4636 chars, 14 params)
+[3] API rules and filters (1,327 tokens, 8147 chars, 0 params)
+[4] Client-side SDKs (99 tokens, 475 chars, 0 params)
+[5] Authentication (1,479 tokens, 8232 chars, 0 params)
+[6] Files upload and handling (1,338 tokens, 7671 chars, 0 params)
+[7] Working with relations (1,150 tokens, 6107 chars, 0 params)
+[8] Use as framework (437 tokens, 2478 chars, 0 params)
+[9] Web APIs reference - API Records (9,820 tokens, 36449 chars, 74 params)
+[10] Going to production (985 tokens, 6233 chars, 0 params)
+[11] Web APIs reference - API Records (9,820 tokens, 36449 chars, 74 params)
+[12] Web APIs reference - API Realtime (865 tokens, 4181 chars, 2 params)
+[13] Web APIs reference - API Files (746 tokens, 2016 chars, 6 params)
+[14] Web APIs reference - API Admins (4,599 tokens, 16403 chars, 29 params)
+[15] Web APIs reference - API Collections (6,987 tokens, 23180 chars, 55 params)
+[16] Web APIs reference - API Settings (5,697 tokens, 18114 chars, 87 params)
+[17] Web APIs reference - API Logs (3,222 tokens, 9128 chars, 9 params)
+[18] Web APIs reference - API Backups (1,507 tokens, 6758 chars, 7 params)
+[19] Web APIs reference - API Health (256 tokens, 603 chars, 1 params)
+[20] Extend with Go - Overview (250 tokens, 1305 chars, 0 params)
+[21] Extend with Go - Event hooks (10,285 tokens, 68082 chars, 0 params)
+[22] Extend with Go - Routing (1,668 tokens, 9779 chars, 0 params)
+[23] Extend with Go - Database (2,094 tokens, 10994 chars, 0 params)
+[24] Extend with Go - Record operations (1,789 tokens, 10456 chars, 0 params)
+[25] Extend with Go - Collection operations (703 tokens, 4249 chars, 0 params)
+[26] Extend with Go - Migrations (1,112 tokens, 7071 chars, 0 params)
+[27] Extend with Go - Jobs scheduling (192 tokens, 916 chars, 0 params)
+[28] Extend with Go - Console commands (163 tokens, 753 chars, 0 params)
+[29] Extend with Go - Sending emails (358 tokens, 1990 chars, 0 params)
+[30] Extend with Go - Rendering templates (523 tokens, 2707 chars, 0 params)
+[31] Extend with Go - Logging (399 tokens, 1962 chars, 0 params)
+[32] Extend with Go - Testing (717 tokens, 4111 chars, 0 params)
+[33] Extend with Go - Custom models (589 tokens, 3235 chars, 0 params)
+[34] pb-ext - Enhanced PocketBase Server (578 tokens, 2817 chars, 0 params)
+[35] pb-ext - Scripts Documentation (463 tokens, 3249 chars, 0 params)
+[36] pb-ext - Collections Implementation (395 tokens, 2547 chars, 0 params)
+[37] pb-ext - Handlers Implementation (1,901 tokens, 10864 chars, 0 params)
+[38] pb-ext - Jobs Implementation (1,078 tokens, 6490 chars, 0 params)
+[39] pb-ext - Routes Implementation (475 tokens, 3010 chars, 0 params)
+[40] pb-deployer - PocketBase Production Deployment (472 tokens, 2560 chars, 0 params)
+
+🔧 CUSTOM PACKAGES INTEGRATED
+================================================================================
+✅ pb-ext - Enhanced PocketBase Server - https://raw.githubusercontent.com/magooney-loon/pb-ext/main/README.md
+✅ pb-ext - Scripts Documentation - https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/scripts/README.md
+✅ pb-ext - Collections Implementation - https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/collections.go
+✅ pb-ext - Handlers Implementation - https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/handlers.go
+✅ pb-ext - Jobs Implementation - https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/jobs.go
+✅ pb-ext - Routes Implementation - https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/routes.go
+✅ pb-deployer - PocketBase Production Deployment - https://raw.githubusercontent.com/magooney-loon/pb-deployer/main/README.md
+
+Total custom packages integrated: 7
+
+================================================================================
+END OF SUMMARY
+================================================================================
