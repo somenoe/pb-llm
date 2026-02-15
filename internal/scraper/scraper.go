@@ -17,75 +17,74 @@ import (
 )
 
 const (
-	BaseURL        = "https://pocketbase.io/docs/"
+	BaseURL        = "https://pocketbase.io/old/docs/"
 	RateLimitDelay = 1 * time.Second
 	MaxRetries     = 3
 	Timeout        = 30 * time.Second
 )
 
 var docSections = []types.DocSection{
-	{Title: "Introduction", URL: "https://pocketbase.io/docs/", Category: "general"},
-	{Title: "How to use PocketBase", URL: "https://pocketbase.io/docs/how-to-use/", Category: "general"},
+	{Title: "Introduction", URL: "https://pocketbase.io/old/docs/", Category: "general"},
+	{Title: "Collections", URL: "https://pocketbase.io/old/docs/collections/", Category: "database"},
+	{Title: "API rules and filters", URL: "https://pocketbase.io/old/docs/api-rules-and-filters/", Category: "api"},
+	{Title: "Client-side SDKs", URL: "https://pocketbase.io/old/docs/client-side-sdks/", Category: "sdk"},
+	{Title: "Authentication", URL: "https://pocketbase.io/old/docs/authentication/", Category: "auth"},
+	{Title: "Files upload and handling", URL: "https://pocketbase.io/old/docs/files-handling/", Category: "files"},
+	{Title: "Working with relations", URL: "https://pocketbase.io/old/docs/working-with-relations/", Category: "database"},
+	{Title: "Use as framework", URL: "https://pocketbase.io/old/docs/use-as-framework/", Category: "setup"},
+	{Title: "Web APIs reference", URL: "https://pocketbase.io/old/docs/api-records/", Category: "api"},
+	{Title: "Going to production", URL: "https://pocketbase.io/old/docs/going-to-production/", Category: "setup"},
+
+	// API Reference
+	{Title: "API Records", URL: "https://pocketbase.io/old/docs/api-records/", Category: "api"},
+	{Title: "API Realtime", URL: "https://pocketbase.io/old/docs/api-realtime/", Category: "api"},
+	{Title: "API Files", URL: "https://pocketbase.io/old/docs/api-files/", Category: "api"},
+	{Title: "API Admins", URL: "https://pocketbase.io/old/docs/api-admins/", Category: "api"},
+	{Title: "API Collections", URL: "https://pocketbase.io/old/docs/api-collections/", Category: "api"},
+	{Title: "API Settings", URL: "https://pocketbase.io/old/docs/api-settings/", Category: "api"},
+	{Title: "API Logs", URL: "https://pocketbase.io/old/docs/api-logs/", Category: "api"},
+	{Title: "API Backups", URL: "https://pocketbase.io/old/docs/api-backups/", Category: "api"},
+	{Title: "API Health", URL: "https://pocketbase.io/old/docs/api-health/", Category: "api"},
+
+	// Go Extensions
+	{Title: "Go Overview", URL: "https://pocketbase.io/old/docs/go-overview/", Category: "hooks"},
+	{Title: "Go Event hooks", URL: "https://pocketbase.io/old/docs/go-event-hooks/", Category: "hooks"},
+	{Title: "Go Routing", URL: "https://pocketbase.io/old/docs/go-routing/", Category: "hooks"},
+	{Title: "Go Database", URL: "https://pocketbase.io/old/docs/go-database/", Category: "hooks"},
+	{Title: "Go Record operations", URL: "https://pocketbase.io/old/docs/go-records/", Category: "hooks"},
+	{Title: "Go Collection operations", URL: "https://pocketbase.io/old/docs/go-collections/", Category: "hooks"},
+	{Title: "Go Migrations", URL: "https://pocketbase.io/old/docs/go-migrations/", Category: "hooks"},
+	{Title: "Go Jobs scheduling", URL: "https://pocketbase.io/old/docs/go-jobs-scheduling/", Category: "hooks"},
+	{Title: "Go Console commands", URL: "https://pocketbase.io/old/docs/go-console-commands/", Category: "hooks"},
+	{Title: "Go Sending emails", URL: "https://pocketbase.io/old/docs/go-sending-emails/", Category: "hooks"},
+	{Title: "Go Rendering templates", URL: "https://pocketbase.io/old/docs/go-rendering-templates/", Category: "hooks"},
+	{Title: "Go Logging", URL: "https://pocketbase.io/old/docs/go-logging/", Category: "hooks"},
+	{Title: "Go Testing", URL: "https://pocketbase.io/old/docs/go-testing/", Category: "hooks"},
+	{Title: "Go Custom models", URL: "https://pocketbase.io/old/docs/go-custom-models/", Category: "hooks"},
+
+	// JavaScript Extensions
+	{Title: "JS Overview", URL: "https://pocketbase.io/old/docs/js-overview/", Category: "hooks"},
+	{Title: "JS Event hooks", URL: "https://pocketbase.io/old/docs/js-event-hooks/", Category: "hooks"},
+	{Title: "JS Routing", URL: "https://pocketbase.io/old/docs/js-routing/", Category: "hooks"},
+	{Title: "JS Database", URL: "https://pocketbase.io/old/docs/js-database/", Category: "hooks"},
+	{Title: "JS Record operations", URL: "https://pocketbase.io/old/docs/js-records/", Category: "hooks"},
+	{Title: "JS Collection operations", URL: "https://pocketbase.io/old/docs/js-collections/", Category: "hooks"},
+	{Title: "JS Migrations", URL: "https://pocketbase.io/old/docs/js-migrations/", Category: "hooks"},
+	{Title: "JS Jobs scheduling", URL: "https://pocketbase.io/old/docs/js-jobs-scheduling/", Category: "hooks"},
+	{Title: "JS Console commands", URL: "https://pocketbase.io/old/docs/js-console-commands/", Category: "hooks"},
+	{Title: "JS Sending emails", URL: "https://pocketbase.io/old/docs/js-sending-emails/", Category: "hooks"},
+	{Title: "JS Sending HTTP requests", URL: "https://pocketbase.io/old/docs/js-sending-http-requests/", Category: "hooks"},
+	{Title: "JS Rendering templates", URL: "https://pocketbase.io/old/docs/js-rendering-templates/", Category: "hooks"},
+	{Title: "JS Logging", URL: "https://pocketbase.io/old/docs/js-logging/", Category: "hooks"},
+
+	// External Resources
 	{Title: "pb-ext - Enhanced PocketBase Server", URL: "https://raw.githubusercontent.com/magooney-loon/pb-ext/main/README.md", Category: "general"},
 	{Title: "pb-ext - Scripts Documentation", URL: "https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/scripts/README.md", Category: "general"},
 	{Title: "pb-ext - Collections Implementation", URL: "https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/collections.go", Category: "hooks"},
 	{Title: "pb-ext - Handlers Implementation", URL: "https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/handlers.go", Category: "hooks"},
 	{Title: "pb-ext - Jobs Implementation", URL: "https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/jobs.go", Category: "hooks"},
 	{Title: "pb-ext - Routes Implementation", URL: "https://raw.githubusercontent.com/magooney-loon/pb-ext/refs/heads/main/cmd/server/routes.go", Category: "hooks"},
-	{Title: "Going to production", URL: "https://pocketbase.io/docs/going-to-production/", Category: "setup"},
 	{Title: "pb-deployer - PocketBase Production Deployment", URL: "https://raw.githubusercontent.com/magooney-loon/pb-deployer/main/README.md", Category: "setup"},
-	{Title: "Collections", URL: "https://pocketbase.io/docs/collections/", Category: "database"},
-	{Title: "API rules and filters", URL: "https://pocketbase.io/docs/api-rules-and-filters/", Category: "api"},
-	{Title: "Working with relations", URL: "https://pocketbase.io/docs/working-with-relations/", Category: "database"},
-	{Title: "Authentication", URL: "https://pocketbase.io/docs/authentication/", Category: "auth"},
-	{Title: "Files upload and handling", URL: "https://pocketbase.io/docs/files-handling/", Category: "files"},
-
-	{Title: "Collection API", URL: "https://pocketbase.io/docs/api-collections/", Category: "api"},
-	{Title: "Record CRUD API", URL: "https://pocketbase.io/docs/api-records/", Category: "api"},
-	{Title: "Realtime API", URL: "https://pocketbase.io/docs/api-realtime/", Category: "api"},
-
-	{Title: "Files API", URL: "https://pocketbase.io/docs/api-files/", Category: "api"},
-	{Title: "API Crons", URL: "https://pocketbase.io/docs/api-crons/", Category: "api"},
-	{Title: "Settings API", URL: "https://pocketbase.io/docs/api-settings/", Category: "api"},
-	{Title: "Logs API", URL: "https://pocketbase.io/docs/api-logs/", Category: "api"},
-	{Title: "Health API", URL: "https://pocketbase.io/docs/api-health/", Category: "api"},
-	{Title: "Backups API", URL: "https://pocketbase.io/docs/api-backups/", Category: "api"},
-	{Title: "JavaScript SDK", URL: "https://pocketbase.io/docs/js-overview/", Category: "sdk"},
-
-	// Go Extensions
-	{Title: "Go Overview", URL: "https://pocketbase.io/docs/go-overview/", Category: "hooks"},
-	{Title: "Go Event hooks", URL: "https://pocketbase.io/docs/go-event-hooks/", Category: "hooks"},
-	{Title: "Go Routing", URL: "https://pocketbase.io/docs/go-routing/", Category: "hooks"},
-	{Title: "Go Database", URL: "https://pocketbase.io/docs/go-database/", Category: "hooks"},
-	{Title: "Go Record operations", URL: "https://pocketbase.io/docs/go-records/", Category: "hooks"},
-	{Title: "Go Collection operations", URL: "https://pocketbase.io/docs/go-collections/", Category: "hooks"},
-	{Title: "Go migrations", URL: "https://pocketbase.io/docs/go-migrations/", Category: "hooks"},
-	{Title: "Go Jobs scheduling", URL: "https://pocketbase.io/docs/go-jobs-scheduling/", Category: "hooks"},
-	{Title: "Go Sending emails", URL: "https://pocketbase.io/docs/go-sending-emails/", Category: "hooks"},
-	{Title: "Go Rendering templates", URL: "https://pocketbase.io/docs/go-rendering-templates/", Category: "hooks"},
-	{Title: "Go Console commands", URL: "https://pocketbase.io/docs/go-console-commands/", Category: "hooks"},
-	{Title: "Go Realtime messaging", URL: "https://pocketbase.io/docs/go-realtime/", Category: "hooks"},
-	{Title: "Go Filesystem", URL: "https://pocketbase.io/docs/go-filesystem/", Category: "hooks"},
-	{Title: "Go Logging", URL: "https://pocketbase.io/docs/go-logging/", Category: "hooks"},
-	{Title: "Go Testing", URL: "https://pocketbase.io/docs/go-testing/", Category: "hooks"},
-	{Title: "Go Miscellaneous", URL: "https://pocketbase.io/docs/go-miscellaneous/", Category: "hooks"},
-	{Title: "Go Record proxy", URL: "https://pocketbase.io/docs/go-record-proxy/", Category: "hooks"},
-
-	// JavaScript Extensions
-	{Title: "JavaScript Overview", URL: "https://pocketbase.io/docs/js-overview/", Category: "hooks"},
-	{Title: "JavaScript Event hooks", URL: "https://pocketbase.io/docs/js-event-hooks/", Category: "hooks"},
-	{Title: "JavaScript Routing", URL: "https://pocketbase.io/docs/js-routing/", Category: "hooks"},
-	{Title: "JavaScript Database", URL: "https://pocketbase.io/docs/js-database/", Category: "hooks"},
-	{Title: "JavaScript Record operations", URL: "https://pocketbase.io/docs/js-records/", Category: "hooks"},
-	{Title: "JavaScript Collection operations", URL: "https://pocketbase.io/docs/js-collections/", Category: "hooks"},
-	{Title: "JavaScript migrations", URL: "https://pocketbase.io/docs/js-migrations/", Category: "hooks"},
-	{Title: "JavaScript Jobs scheduling", URL: "https://pocketbase.io/docs/js-jobs-scheduling/", Category: "hooks"},
-	{Title: "JavaScript Sending emails", URL: "https://pocketbase.io/docs/js-sending-emails/", Category: "hooks"},
-	{Title: "JavaScript Rendering templates", URL: "https://pocketbase.io/docs/js-rendering-templates/", Category: "hooks"},
-	{Title: "JavaScript Console commands", URL: "https://pocketbase.io/docs/js-console-commands/", Category: "hooks"},
-	{Title: "JavaScript Realtime messaging", URL: "https://pocketbase.io/docs/js-realtime/", Category: "hooks"},
-	{Title: "JavaScript Filesystem", URL: "https://pocketbase.io/docs/js-filesystem/", Category: "hooks"},
-	{Title: "JavaScript Logging", URL: "https://pocketbase.io/docs/js-logging/", Category: "hooks"},
 }
 
 type Scraper struct {
