@@ -1,0 +1,170 @@
+POCKETBASE DOCUMENTATION
+==================================================
+
+Generated: 2026-02-25 12:41:03 | Sections: 1
+
+[1] Extend with Go - Migrations
+URL: https://pocketbase.io/old/docs/go-migrations/
+Category: go-extensions
+
+Content:
+# Extend with Go - Migrations
+PocketBase comes with a builtin DB and data migration utility, allowing you to version your DB structure,
+create collections programmatically, initialize default settings, etc.
+Because the migrations are regular Go functions, besides applying schema changes, they could be used also
+to adjust existing data to fit the new schema or any other app specific logic that you want to run only
+once.
+And as a bonus, being .go files also ensures that the migrations will be embedded seamlessly in
+your final executable.
+### Enable the migrate command
+The prebuilt executable enables the migrate command by default, but when you are extending PocketBase
+with Go you have to enable it manually:
+// main.go
+package main
+import (
+"log"
+"strings"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/plugins/migratecmd"
+"github.com/pocketbase/pocketbase/tools/osutils"
+// uncomment once you have at least one .go migration file in the "migrations" directory
+// _ "yourpackage/migrations"
+func main() {
+app := pocketbase.New()
+migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
+// enable auto creation of migration files when making collection changes in the Admin UI
+// (use IsProbablyGoRun to enable it only during development, aka. when running with "go run")
+Automigrate: osutils.IsProbablyGoRun(),
+if err := app.Start(); err != nil {
+log.Fatal(err)
+The above example also shows the Automigrate config option which when enabled will create automatically
+a Go migration file for you for every collection change made in the Admin UI.
+### Creating migrations
+To create a new blank migration you can run migrate create.
+// Since the "create" command makes sense only during development,
+// it is expected the user to be in the app working directory
+// and to be using "go run ..."
+[root@dev app]$ go run main.go migrate create "your_new_migration"
+// migrations/1655834400_your_new_migration.go
+package migrations
+import (
+"github.com/pocketbase/dbx"
+m "github.com/pocketbase/pocketbase/migrations"
+func init() {
+m.Register(func(db dbx.Builder) error {
+// add up queries...
+return nil
+}, func(db dbx.Builder) error {
+// add down queries...
+return nil
+The above will create a new blank migration file inside the configured command migrations directory.
+To make your application aware of the registered migrations, you simply have to import the above
+migrations package in one of your main package files:
+package main
+import _ "yourpackage/migrations"
+New migrations are applied automatically on serve.
+Optionally, you could apply new migrations manually by running migrate up.
+To revert the last applied migration(s), you could run migrate down [number].
+##### Migration file
+Each migration file should have a single m.Register(upFunc, downFunc) call.
+In the migration file, you are expected to write your &quot;upgrade&quot; code in the upFunc callback.
+The downFunc is optional and it should contains the &quot;downgrade&quot; operations to revert the
+changes made by the upFunc.
+Both callbacks accept a single db argument (dbx.Builder) that you can use
+directly or create a Dao instance and use its available helpers. You can explore the
+Database guide
+for more details how to operate with the db object and its available methods.
+### Collections snapshot
+PocketBase comes also with a migrate collections command that will generate a full snapshot of
+your current Collections configuration without having to type it manually:
+// Since the "collections" command makes sense only during development,
+// it is expected the user to be in the app working directory
+// and to be using "go run ..."
+[root@dev app]$ go run main.go migrate collections
+Similar to the migrate create command, this will generate a new migration file in the
+migrations directory.
+It is safe to run the command multiple times and generate multiple snapshot migration files.
+### Migrations history
+All applied migration filenames are stored in the internal _migrations table.
+During local development often you might end up making various collection changes to test different approaches.
+When Automigrate is enabled this could lead in a migration history with unnecessary intermediate
+steps that may not be wanted in the final migration history.
+To avoid the clutter and to prevent applying the intermediate steps in production, you can remove (or
+squash) the unnecessary migration files manually and then update the local migrations history by running:
+`[root@dev app]$ go run main.go migrate history-sync`
+The above command will remove any entry from the _migrations table that doesn&#39;t have a related
+migration file associated with it.
+// migrations/1687801090_set_pending_status.go
+package migrations
+import (
+"github.com/pocketbase/dbx"
+m "github.com/pocketbase/pocketbase/migrations"
+// set a default "pending" status to all empty status articles
+func init() {
+m.Register(func(db dbx.Builder) error {
+_, err := db.NewQuery("UPDATE articles SET status = 'pending' WHERE status = ''").Execute()
+return err
+}, nil)
+##### Initialize default application settings
+// migrations/1687801090_initial_settings.go
+package migrations
+import (
+"github.com/pocketbase/dbx"
+"github.com/pocketbase/pocketbase/daos"
+m "github.com/pocketbase/pocketbase/migrations"
+func init() {
+m.Register(func(db dbx.Builder) error {
+dao := daos.New(db)
+settings, _ := dao.FindSettings()
+settings.Meta.AppName = "test"
+settings.Logs.MaxDays = 2
+return dao.SaveSettings(settings)
+}, nil)
+##### Creating new admin
+// migrations/1687801090_initial_admin.go
+package migrations
+import (
+"github.com/pocketbase/dbx"
+"github.com/pocketbase/pocketbase/daos"
+m "github.com/pocketbase/pocketbase/migrations"
+"github.com/pocketbase/pocketbase/models"
+func init() {
+m.Register(func(db dbx.Builder) error {
+dao := daos.New(db)
+admin := &amp;models.Admin{}
+admin.SetPassword("1234567890")
+return dao.SaveAdmin(admin)
+}, func(db dbx.Builder) error { // optional revert operation
+dao := daos.New(db)
+if admin != nil {
+return dao.DeleteAdmin(admin)
+// already deleted
+return nil
+##### Creating new auth record
+// migrations/1687801090_new_users_record.go
+package migrations
+import (
+"github.com/pocketbase/dbx"
+"github.com/pocketbase/pocketbase/daos"
+m "github.com/pocketbase/pocketbase/migrations"
+"github.com/pocketbase/pocketbase/models"
+"github.com/pocketbase/pocketbase/tools/security"
+func init() {
+m.Register(func(db dbx.Builder) error {
+dao := daos.New(db)
+collection, err := dao.FindCollectionByNameOrId("users")
+if err != nil {
+return err
+record := models.NewRecord(collection)
+record.SetUsername("u_" + security.RandomStringWithAlphabet(5, "123456789"))
+record.SetPassword("1234567890")
+record.Set("name", "John Doe")
+return dao.SaveRecord(record)
+}, func(db dbx.Builder) error { // optional revert operation
+dao := daos.New(db)
+if record != nil {
+return dao.DeleteRecord(record)
+// already deleted
+return nil
+--------------------------------------------------------------------------------
+

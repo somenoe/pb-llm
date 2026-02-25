@@ -1,0 +1,46 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Web APIs reference - API Health
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+# Web APIs reference - API Health
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Health check
+Returns the health status of the server.
+GET/HEAD
+/api/health
+Query parameters
+Param
+Type
+Description
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Responses
+"code": 200,
+"message": "API is healthy.",
+"data": {
+"canBackup": false

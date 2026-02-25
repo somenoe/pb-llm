@@ -1,0 +1,140 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Going to production
+# Going to production
+### Deployment strategies
+##### Minimal setup
+One of the best PocketBase features is that it&#39;s completely portable. This mean that it doesn&#39;t require
+any external dependency and
+could be deployed by just uploading the executable on your server.
+Here is an example for starting a production HTTPS server (auto managed TLS with Let&#39;s Encrypt) on clean
+Ubuntu 22.04 installation.
+-Consider the following app directory structure:
+myapp/
+pb_migrations/
+pb_hooks/
+pocketbase
+-Upload the binary and anything else related to your remote server, for example using
+rsync:
+rsync -avz -e ssh /local/path/to/myapp root@YOUR_SERVER_IP:/root/pb
+-Start a SSH session with your server:
+ssh root@YOUR_SERVER_IP
+-Start the executable (specifying a domain name will issue a Let&#39;s encrypt certificate for it)
+[root@dev ~]$ /root/pb/pocketbase serve yourdomain.com
+Notice that in the above example we are logged in as root which allow us to
+bind to the
+privileged 80 and 443 ports.
+For non-root users usually you&#39;ll need special privileges to be able to do
+that. You have several options depending on your OS - authbind,
+setcap,
+iptables, sysctl, etc. Here is an example using setcap:
+[myuser@dev ~]$ sudo setcap 'cap_net_bind_service=+ep' /root/pb/pocketbase
+-(Optional) systemd service
+You can skip step 3 and create a Systemd service
+to allow your application to start/restart on its own.
+Here is an example service file (usually created in
+/lib/systemd/system/pocketbase.service):
+[Unit]
+Description = pocketbase
+[Service]
+Type           = simple
+User           = root
+Group          = root
+LimitNOFILE    = 4096
+Restart        = always
+RestartSec     = 5s
+StandardOutput = append:/root/pb/errors.log
+StandardError  = append:/root/pb/errors.log
+ExecStart      = /root/pb/pocketbase serve yourdomain.com
+[Install]
+WantedBy = multi-user.target
+After that we just have to enable it and start the service using systemctl:
+[root@dev ~]$ systemctl enable pocketbase.service
+[root@dev ~]$ systemctl start pocketbase
+##### Using reverse proxy
+If you plan hosting multiple applications on a single server or need finer network controls (rate limiter,
+IPs whitelisting, etc.), you could always put PocketBase behind a reverse proxy such as
+NGINX, Apache, Caddy, etc.
+Here is a minimal NGINX example configuration:
+server {
+listen 80;
+client_max_body_size 10M;
+location / {
+# check http://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive
+proxy_set_header Connection '';
+proxy_http_version 1.1;
+proxy_read_timeout 360s;
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+# enable if you are serving under a subpath location
+# rewrite /yourSubpath/(.*) /$1  break;
+proxy_pass http://127.0.0.1:8090;
+Corresponding Caddy configuration is:
+request_body {
+max_size 10MB
+reverse_proxy 127.0.0.1:8090 {
+transport http {
+read_timeout 360s
+##### Using Docker
+Some hosts (eg. fly.io) use Docker
+for deployments. PocketBase doesn&#39;t have an official Docker image yet, but you could use the below
+Dockerfile as an example:
+FROM alpine:latest
+ARG PB_VERSION=0.22.38
+RUN apk add --no-cache \
+unzip \
+ca-certificates
+# uncomment to copy the local pb_migrations dir into the image
+# COPY ./pb_migrations /pb/pb_migrations
+# uncomment to copy the local pb_hooks dir into the image
+# COPY ./pb_hooks /pb/pb_hooks
+EXPOSE 8080
+# start PocketBase
+CMD ["/old/pb/pocketbase", "serve", "--http=0.0.0.0:8080"]
+To persist your data you need to mount a volume at /pb/pb_data.
+For a full example you could check the
+&quot;Host for free on Fly.io&quot;
+guide.
+### Backup and Restore
+PocketBase v0.16+ comes with built-in backups and restore APIs that could be accessed from the Admin UI (Settings
+&gt; Backups):
+Note that the application will be temporary set in read-only mode during the backup&#39;s ZIP generation.
+Backups can be stored locally (default) or in an external S3 storage.
+Alternatively, you can always manually copy your pb_data directory
+(for transactional safety make sure that the application is not running).
+### Recommendations
+By default, PocketBase uses the internal Unix sendmail command for sending emails.
+While it&#39;s OK for development, it&#39;s not very useful for production, because your emails most likely will get
+marked as spam or even fail to deliver.
+To avoid deliverability issues, consider using a local SMTP server or an external mail service like
+MailerSend,
+Brevo,
+SendGrid,
+Mailgun,
+AWS SES, etc.
+Once you&#39;ve decided on a mail service, you could configure the PocketBase SMTP settings from the Admin UI
+(Settings &gt; Mail settings):
+Unix uses &quot;file descriptors&quot; also for network connections and most systems have a default limit
+of ~ 1024.
+If your application has a lot of concurrent realtime connections, it is possible that at some point you would
+get an error such as: Too many open files.
+One way to mitigate this is to check your current account resource limits by running
+ulimit -a and find the parameter you want to change. For example, if you want to increase the
+open files limit (-n), you could run
+ulimit -n 4096 before starting PocketBase.
+It is fine to ignore the below if you are not sure whether you need it.
+By default, PocketBase stores the applications settings in the database as plain JSON text, including the
+secret keys for the OAuth2 clients and the SMTP password.
+While this is not a security issue on its own (PocketBase applications live entirely on a single server
+and its expected only authorized users to have access to your server and application data), in some
+situations it may be a good idea to store the settings encrypted in case someone get their hands on your
+database file (eg. from an external stored backup).
+To store your PocketBase settings encrypted:
+-Create a new environment variable and set a random 32 characters string as its value.
+eg. add
+export PB_ENCRYPTION_KEY=&quot;LSidmCcAa6gwn777BwRZJVLdDkSWfvVL&quot;
+in your shell profile file
+-Start the application with --encryptionEnv=YOUR_ENV_VAR flag.
+eg. pocketbase serve --encryptionEnv=PB_ENCRYPTION_KEY

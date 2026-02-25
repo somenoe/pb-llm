@@ -1,0 +1,54 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Extend with Go - Sending emails
+# Extend with Go - Sending emails
+PocketBase provides a simple abstraction for sending emails via the
+app.NewMailClient() helper.
+Depending on your configured mail settings (Admin UI &gt; Settings &gt; Mail settings) it will use the
+sendmail command or a SMTP client.
+### Send custom email
+You can also send your own custom email from everywhere within your app (hooks, middlewares, routes, etc.)
+by using app.NewMailClient().Send(message). Here is an example of sending a custom email
+after user registration:
+// main.go
+package main
+import (
+"log"
+"net/mail"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+"github.com/pocketbase/pocketbase/tools/mailer"
+func main() {
+app := pocketbase.New()
+app.OnRecordAfterCreateRequest("users").Add(func(e *core.RecordCreateEvent) error {
+message := &amp;mailer.Message{
+From: mail.Address{
+Address: app.Settings().Meta.SenderAddress,
+Name:    app.Settings().Meta.SenderName,
+To:      []mail.Address{{Address: e.Record.Email()}},
+Subject: "YOUR_SUBJECT...",
+HTML:    "YOUR_HTML_BODY...",
+// bcc, cc, attachments and custom headers are also supported...
+return app.NewMailClient().Send(message)
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### Overwrite system emails
+If you want to overwrite the default system emails for forgotten password, verification, etc., you can
+adjust the default templates from the Admin UI &gt; Settings &gt; Mail settings.
+Alternatively, you can also apply individual changes by binding to one of the
+before mailer hooks. Here is an example of appending a
+Record field value to the subject using the OnMailerBeforeRecordResetPasswordSend hook:
+// main.go
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnMailerBeforeRecordResetPasswordSend().Add(func(e *core.MailerRecordEvent) error {
+// modify the subject
+e.Message.Subject += (" " + e.Record.GetString("name"))
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)

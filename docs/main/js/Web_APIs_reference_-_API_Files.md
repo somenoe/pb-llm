@@ -1,0 +1,124 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Web APIs reference - API Files
+collectionIdOrName(String):ID or name of the collection whose record model contains the file resource.
+recordId(String):ID of the record model that contains the file resource.
+filename(String):Name of the file resource.
+thumb(String):Get the thumb of the requested file.
+The following thumb formats are currently supported:
+WxH
+(eg. 100x300) - crop to WxH viewbox (from center)
+WxHt
+(eg. 100x300t) - crop to WxH viewbox (from top)
+WxHb
+(eg. 100x300b) - crop to WxH viewbox (from bottom)
+WxHf
+(eg. 100x300f) - fit inside a WxH viewbox (without cropping)
+0xH
+(eg. 0x300) - resize to H height preserving the aspect ratio
+Wx0
+(eg. 100x0) - resize to W width preserving the aspect ratio
+If the thumb size is not defined in the file schema field options or the file resource is not
+an image (jpg, png, gif), then the original file resource is returned unmodified.
+token(String):Optional file token for granting access to
+protected file(s).
+For an example, you can check
+"Files upload and handling".
+download(Boolean):If it is set to a truthy value (1, t, true) the file will be
+served with Content-Disposition: attachment header instructing the browser to
+ignore the file preview for pdf, images, videos, etc. and to directly download the file.
+# Web APIs reference - API Files
+- **collectionIdOrName** (String): ID or name of the collection whose record model contains the file resource.
+- **recordId** (String): ID of the record model that contains the file resource.
+- **filename** (String): Name of the file resource.
+- **thumb** (String): Get the thumb of the requested file.
+The following thumb formats are currently supported:
+WxH
+(eg. 100x300) - crop to WxH viewbox (from center)
+WxHt
+(eg. 100x300t) - crop to WxH viewbox (from top)
+WxHb
+(eg. 100x300b) - crop to WxH viewbox (from bottom)
+WxHf
+(eg. 100x300f) - fit inside a WxH viewbox (without cropping)
+0xH
+(eg. 0x300) - resize to H height preserving the aspect ratio
+Wx0
+(eg. 100x0) - resize to W width preserving the aspect ratio
+If the thumb size is not defined in the file schema field options or the file resource is not
+an image (jpg, png, gif), then the original file resource is returned unmodified.
+- **token** (String): Optional file token for granting access to
+protected file(s).
+For an example, you can check
+"Files upload and handling".
+served with Content-Disposition: attachment header instructing the browser to
+Files are uploaded, updated or deleted via the
+Records API.
+manipulations, like generating thumbs).
+GET
+/api/files/`collectionIdOrName`/`recordId`/`filename`
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the collection whose record model contains the file resource.
+recordId
+String
+ID of the record model that contains the file resource.
+filename
+String
+Name of the file resource.
+Query parameters
+Param
+Type
+Description
+thumb
+String
+Get the thumb of the requested file.
+The following thumb formats are currently supported:
+-WxH
+(eg. 100x300) - crop to WxH viewbox (from center)
+-WxHt
+(eg. 100x300t) - crop to WxH viewbox (from top)
+-WxHb
+(eg. 100x300b) - crop to WxH viewbox (from bottom)
+-WxHf
+(eg. 100x300f) - fit inside a WxH viewbox (without cropping)
+-0xH
+(eg. 0x300) - resize to H height preserving the aspect ratio
+-Wx0
+(eg. 100x0) - resize to W width preserving the aspect ratio
+If the thumb size is not defined in the file schema field options or the file resource is not
+an image (jpg, png, gif), then the original file resource is returned unmodified.
+token
+String
+Optional file token for granting access to
+protected file(s).
+For an example, you can check
+&quot;Files upload and handling&quot;.
+Boolean
+If it is set to a truthy value (1, t, true) the file will be
+served with `Content-Disposition: attachment` header instructing the browser to
+Responses
+`[file resource]`
+"code": 400,
+"message": "Filesystem initialization failure.",
+"data": {}
+"code": 404,
+"message": "The requested resource wasn't found.",
+"data": {}
+Generate protected file token
+Generates a short-lived file token for accessing
+protected file(s).
+The client must be admin or auth record authenticated (aka. have regular authorization token sent
+with the request).
+POST
+/api/files/token
+Requires `Authorization: TOKEN`
+Responses
+"token": "..."
+"code": 400,
+"message": "Failed to generate file token.",
+"data": {}

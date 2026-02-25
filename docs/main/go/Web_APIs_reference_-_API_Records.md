@@ -1,0 +1,1740 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Web APIs reference - API Records
+collectionIdOrName(String):ID or name of the records' collection.
+page(Number):The page (aka. offset) of the paginated list (default to 1).
+perPage(Number):The max returned records per page (default to 30).
+sort(String):Specify the ORDER BY fields.
+Add - / + (default) in front of the attribute for DESC /
+ASC order, eg.:
+// DESC by created and ASC by id
+?sort=-created,id
+Supported record sort fields:
+@random, id, created, updated,
+and any other field from the collection schema.
+filter(String):Filter expression to filter/search the returned records list (in addition to the
+collection's listRule), eg.:
+?filter=(title~'abc' && created>'2022-01-01')
+Supported record filter fields:
+id, created, updated,
++ any field from the collection schema.
+The syntax basically follows the format
+OPERAND
+OPERATOR
+OPERAND, where:
+OPERAND - could be any of the above field literal, string (single or double
+quoted), number, null, true, false
+OPERATOR - is one of:
+Equal
+!=
+NOT equal
+Greater than
+>=
+Greater than or equal
+Less than
+<=
+Less than or equal
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+!~
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+?=
+Any/At least one of
+Equal
+?!=
+Any/At least one of
+NOT equal
+?>
+Any/At least one of
+Greater than
+?>=
+Any/At least one of
+Greater than or equal
+?<
+Any/At least one of
+Less than
+?<=
+Any/At least one of
+Less than or equal
+?~
+Any/At least one of
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+?!~
+Any/At least one of
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+To group and combine several expressions you could use parenthesis
+(...), && (AND) and || (OR) tokens.
+Single line comments are also supported: // Example comment.
+expand(String):Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+skipTotal(Boolean):If it is set the total counts query will be skipped and the response fields
+totalItems and totalPages will have -1 value.
+This could drastically speed up the search queries when the total counters are not needed or cursor based
+pagination is used.
+For optimization purposes, it is set by default for the
+getFirstListItem()
+and
+getFullList() SDKs methods.
+collectionIdOrName(String):ID or name of the record's collection.
+recordId(String):ID of the record to view.
+expand(String):Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+collectionIdOrName(String):ID or name of the record's collection.
+Optional
+id(String):15 characters string to store as record ID.
+If not set, it will be auto generated.
+Optional
+username(String):The username of the auth record.
+If not set, it will be auto generated.
+Optional
+email(String):Auth record email address.
+Optional
+emailVisibility(Boolean):Whether to show/hide the auth record email when fetching the record data.
+Required
+password(String):Auth record password.
+Required
+passwordConfirm(String):Auth record password confirmation.
+Optional
+verified(Boolean):Indicates whether the auth record is verified or not.
+This field can be set only by admins or auth records with "Manage" access.
+expand(String):Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+collectionIdOrName(String):ID or name of the record's collection.
+recordId(String):ID of the record to update.
+Optional
+username(String):The username of the auth record.
+Optional
+email(String):The auth record email address.
+This field can be updated only by admins or auth records with "Manage" access.
+Regular accounts can update their email by calling "Request email change".
+Optional
+emailVisibility(Boolean):Whether to show/hide the auth record email when fetching the record data.
+Optional
+oldPassword*(String):Old auth record password.
+This field is required only when changing the record password. Admins and auth records with
+"Manage" access can skip this field.
+Optional
+password(String):New auth record password.
+Optional
+passwordConfirm(String):New auth record password confirmation.
+Optional
+verified(Boolean):Indicates whether the auth record is verified or not.
+This field can be set only by admins or auth records with "Manage" access.
+expand(String):Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+collectionIdOrName(String):ID or name of the record's collection.
+recordId(String):ID of the record to delete.
+collectionIdOrName(String):ID or name of the auth collection.
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+collectionIdOrName(String):ID or name of the auth collection.
+Required
+identity(String):Auth record username or email address.
+Required
+password(String):Auth record password.
+expand(String):Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,record.expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,record.description:excerpt(200,true)
+collectionIdOrName(String):ID or name of the auth collection.
+Required
+provider(String):The name of the OAuth2 client provider (eg. "google").
+Required
+code(String):The authorization code returned from the initial request.
+Required
+codeVerifier(String):The code verifier sent with the initial request as part of the code_challenge.
+Required
+redirectUrl(String):The redirect url sent with the initial request.
+Optional
+createData(Object):Optional data that will be used when creating the auth record on OAuth2 sign-up.
+The created auth record must comply with the same requirements and validations in the
+regular create action.
+The data can only be in json, aka. multipart/form-data and
+files upload currently are not supported during OAuth2 sign-ups.
+expand(String):Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,record.expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,record.description:excerpt(200,true)
+collectionIdOrName(String):ID or name of the auth collection.
+expand(String):Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,record.expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,record.description:excerpt(200,true)
+collectionIdOrName(String):ID or name of the auth collection.
+Required
+email(String):The email address to send the password reset request (if registered).
+collectionIdOrName(String):ID or name of the auth collection.
+Required
+token(String):The token from the verification request email.
+Required
+email(String):The email address to send the password reset request (if registered).
+collectionIdOrName(String):ID or name of the auth collection.
+collectionIdOrName(String):ID or name of the auth collection.
+Required
+token(String):The token from the password reset request email.
+Required
+password(String):The new auth record password to set.
+Required
+passwordConfirm(String):New auth record password confirmation.
+collectionIdOrName(String):ID or name of the auth collection.
+Required
+newEmail(String):The new email address to send the change email request.
+collectionIdOrName(String):ID or name of the auth collection.
+Required
+token(String):The token from the change email request.
+Required
+password(String):The auth record password to confirm the email address change.
+collectionIdOrName(String):ID or name of the auth collection.
+id(String):ID of the auth record.
+fields(String):Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+collectionIdOrName(String):ID or name of the auth collection.
+id(String):ID of the auth record.
+provider(String):The name of the auth provider to unlink, eg. google, twitter,
+github, etc.
+# Web APIs reference - API Records
+- **collectionIdOrName** (String): ID or name of the records' collection.
+- **page** (Number): The page (aka. offset) of the paginated list (default to 1).
+- **perPage** (Number): The max returned records per page (default to 30).
+- **sort** (String): Specify the ORDER BY fields.
+Add - / + (default) in front of the attribute for DESC /
+ASC order, eg.:
+// DESC by created and ASC by id
+?sort=-created,id
+Supported record sort fields:
+@random, id, created, updated,
+and any other field from the collection schema.
+- **filter** (String): Filter expression to filter/search the returned records list (in addition to the
+collection's listRule), eg.:
+?filter=(title~'abc' && created>'2022-01-01')
+Supported record filter fields:
+id, created, updated,
++ any field from the collection schema.
+The syntax basically follows the format
+OPERAND
+OPERATOR
+OPERAND, where:
+OPERAND - could be any of the above field literal, string (single or double
+quoted), number, null, true, false
+OPERATOR - is one of:
+Equal
+NOT equal
+Greater than
+Greater than or equal
+Less than
+Less than or equal
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+Any/At least one of
+Equal
+Any/At least one of
+NOT equal
+Any/At least one of
+Greater than
+Any/At least one of
+Greater than or equal
+Any/At least one of
+Less than
+Any/At least one of
+Less than or equal
+Any/At least one of
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+?!~
+Any/At least one of
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+To group and combine several expressions you could use parenthesis
+(...), && (AND) and || (OR) tokens.
+Single line comments are also supported: // Example comment.
+- **expand** (String): Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- **skipTotal** (Boolean): If it is set the total counts query will be skipped and the response fields
+totalItems and totalPages will have -1 value.
+This could drastically speed up the search queries when the total counters are not needed or cursor based
+pagination is used.
+For optimization purposes, it is set by default for the
+getFirstListItem()
+and
+getFullList() SDKs methods.
+- **collectionIdOrName** (String): ID or name of the record's collection.
+- **recordId** (String): ID of the record to view.
+- **expand** (String): Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- **collectionIdOrName** (String): ID or name of the record's collection.
+- **Optional
+id** (String): 15 characters string to store as record ID.
+If not set, it will be auto generated.
+- **Optional
+username** (String): The username of the auth record.
+If not set, it will be auto generated.
+- **Optional
+email** (String): Auth record email address.
+- **Optional
+emailVisibility** (Boolean): Whether to show/hide the auth record email when fetching the record data.
+- **Required
+password** (String): Auth record password.
+- **Required
+passwordConfirm** (String): Auth record password confirmation.
+- **Optional
+verified** (Boolean): Indicates whether the auth record is verified or not.
+This field can be set only by admins or auth records with "Manage" access.
+- **expand** (String): Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- **collectionIdOrName** (String): ID or name of the record's collection.
+- **recordId** (String): ID of the record to update.
+- **Optional
+username** (String): The username of the auth record.
+- **Optional
+email** (String): The auth record email address.
+This field can be updated only by admins or auth records with "Manage" access.
+Regular accounts can update their email by calling "Request email change".
+- **Optional
+emailVisibility** (Boolean): Whether to show/hide the auth record email when fetching the record data.
+- **Optional
+oldPassword** (String) (required): Old auth record password.
+This field is required only when changing the record password. Admins and auth records with
+"Manage" access can skip this field.
+- **Optional
+password** (String): New auth record password.
+- **Optional
+passwordConfirm** (String): New auth record password confirmation.
+- **Optional
+verified** (Boolean): Indicates whether the auth record is verified or not.
+This field can be set only by admins or auth records with "Manage" access.
+- **expand** (String): Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- **collectionIdOrName** (String): ID or name of the record's collection.
+- **recordId** (String): ID of the record to delete.
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **Required
+identity** (String): Auth record username or email address.
+- **Required
+password** (String): Auth record password.
+- **expand** (String): Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,record.expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,record.description:excerpt(200,true)
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **Required
+provider** (String): The name of the OAuth2 client provider (eg. "google").
+- **Required
+code** (String): The authorization code returned from the initial request.
+- **Required
+codeVerifier** (String): The code verifier sent with the initial request as part of the code_challenge.
+- **Required
+redirectUrl** (String): The redirect url sent with the initial request.
+- **Optional
+createData** (Object): Optional data that will be used when creating the auth record on OAuth2 sign-up.
+The created auth record must comply with the same requirements and validations in the
+regular create action.
+The data can only be in json, aka. multipart/form-data and
+files upload currently are not supported during OAuth2 sign-ups.
+- **expand** (String): Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,record.expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,record.description:excerpt(200,true)
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **expand** (String): Auto expand record relations. Ex.:
+?expand=relField1,relField2.subRelField
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+expand property (eg. "expand": {"relField1": {...}, ...}).
+Only the relations to which the request user has permissions to view will
+be expanded.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,record.expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,record.description:excerpt(200,true)
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **Required
+email** (String): The email address to send the password reset request (if registered).
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **Required
+token** (String): The token from the verification request email.
+- **Required
+email** (String): The email address to send the password reset request (if registered).
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **Required
+token** (String): The token from the password reset request email.
+- **Required
+password** (String): The new auth record password to set.
+- **Required
+passwordConfirm** (String): New auth record password confirmation.
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **Required
+newEmail** (String): The new email address to send the change email request.
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **Required
+token** (String): The token from the change email request.
+- **Required
+password** (String): The auth record password to confirm the email address change.
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **id** (String): ID of the auth record.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- **collectionIdOrName** (String): ID or name of the auth collection.
+- **id** (String): ID of the auth record.
+- **provider** (String): The name of the auth provider to unlink, eg. google, twitter,
+github, etc.
+### CRUD actions
+List/Search records
+Returns a paginated records list, supporting sorting and filtering.
+Depending on the collection&#39;s listRule value, the access to this action may or may not
+have been restricted.
+You could find individual generated records API documentation in the &quot;Admin UI &gt; Collections &gt;
+API Preview&quot;.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+// fetch a paginated records list
+const resultList = await pb.collection('posts').getList(1, 50, {
+filter: 'created >= "2022-01-01 00:00:00" &amp;&amp; someField1 != someField2',
+// you can also fetch all records at once via getFullList
+const records = await pb.collection('posts').getFullList({
+sort: '-created',
+// or fetch only the first record that matches the specified filter
+const record = await pb.collection('posts').getFirstListItem('someField="test"', {
+expand: 'relField1,relField2.subRelField',
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+// fetch a paginated records list
+final resultList = await pb.collection('posts').getList(
+page: 1,
+perPage: 50,
+filter: 'created >= "2022-01-01 00:00:00" &amp;&amp; someField1 != someField2',
+// you can also fetch all records at once via getFullList
+final records = await pb.collection('posts').getFullList(sort: '-created');
+// or fetch only the first record that matches the specified filter
+final record = await pb.collection('posts').getFirstListItem(
+'someField="test"',
+expand: 'relField1,relField2.subRelField',
+GET
+/api/collections/`collectionIdOrName`/records
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the records&#39; collection.
+Query parameters
+Param
+Type
+Description
+page
+Number
+The page (aka. offset) of the paginated list (default to 1).
+perPage
+Number
+The max returned records per page (default to 30).
+sort
+String
+Specify the ORDER BY fields.
+Add - / + (default) in front of the attribute for DESC /
+ASC order, eg.:
+// DESC by created and ASC by id
+?sort=-created,id
+Supported record sort fields:
+@random, id, created, updated,
+and any other field from the collection schema.
+filter
+String
+Filter expression to filter/search the returned records list (in addition to the
+collection&#39;s listRule), eg.:
+`?filter=(title~'abc' &amp;&amp; created>'2022-01-01')`
+Supported record filter fields:
+id, created, updated,
++ any field from the collection schema.
+The syntax basically follows the format
+OPERAND
+OPERATOR
+OPERAND, where:
+-OPERAND - could be any of the above field literal, string (single or double
+quoted), number, null, true, false
+-OPERATOR - is one of:
+Equal
+NOT equal
+Greater than
+Greater than or equal
+-&lt;
+Less than
+-&lt;=
+Less than or equal
+Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for wildcard
+match)
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for
+wildcard match)
+Any/At least one of
+Equal
+Any/At least one of
+NOT equal
+Any/At least one of
+Greater than
+Any/At least one of
+Greater than or equal
+-?&lt;
+Any/At least one of
+Less than
+-?&lt;=
+Any/At least one of
+Less than or equal
+Any/At least one of
+Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for wildcard
+match)
+-?!~
+Any/At least one of
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for
+wildcard match)
+To group and combine several expressions you could use parenthesis
+(...), &amp;&amp; (AND) and || (OR) tokens.
+Single line comments are also supported: // Example comment.
+expand
+String
+Auto expand record relations. Ex.:
+`?expand=relField1,relField2.subRelField`
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+`expand` property (eg. `"expand": {"relField1": {...}, ...}`).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+skipTotal
+Boolean
+If it is set the total counts query will be skipped and the response fields
+`totalItems` and `totalPages` will have `-1` value.
+This could drastically speed up the search queries when the total counters are not needed or cursor based
+pagination is used.
+For optimization purposes, it is set by default for the
+`getFirstListItem()`
+and
+`getFullList()` SDKs methods.
+Responses
+"page": 1,
+"perPage": 100,
+"totalItems": 2,
+"totalPages": 1,
+"items": [
+"id": "ae40239d2bc4477",
+"collectionId": "a98f514eb05f454",
+"collectionName": "posts",
+"updated": "2022-06-25 11:03:50.052",
+"created": "2022-06-25 11:03:35.163",
+"title": "test1"
+"id": "d08dfc4f4d84419",
+"collectionId": "a98f514eb05f454",
+"collectionName": "posts",
+"updated": "2022-06-25 11:03:45.876",
+"created": "2022-06-25 11:03:45.876",
+"title": "test2"
+"code": 400,
+"message": "Something went wrong while processing your request. Invalid filter.",
+"data": {}
+"code": 403,
+"message": "Only admins can filter by '@collection.*'",
+"data": {}
+View record
+Returns a single collection record by its ID.
+Depending on the collection&#39;s viewRule value, the access to this action may or may not
+have been restricted.
+You could find individual generated records API documentation in the &quot;Admin UI &gt; Collections &gt;
+API Preview&quot;.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const record1 = await pb.collection('posts').getOne('RECORD_ID', {
+expand: 'relField1,relField2.subRelField',
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final record1 = await pb.collection('posts').getOne('RECORD_ID',
+expand: 'relField1,relField2.subRelField',
+GET
+/api/collections/`collectionIdOrName`/records/`recordId`
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the record&#39;s collection.
+recordId
+String
+ID of the record to view.
+Query parameters
+Param
+Type
+Description
+expand
+String
+Auto expand record relations. Ex.:
+`?expand=relField1,relField2.subRelField`
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+`expand` property (eg. `"expand": {"relField1": {...}, ...}`).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Responses
+"id": "ae40239d2bc4477",
+"collectionId": "a98f514eb05f454",
+"collectionName": "posts",
+"updated": "2022-06-25 11:03:50.052",
+"created": "2022-06-25 11:03:35.163",
+"title": "test1"
+"code": 403,
+"message": "Only admins can perform this action.",
+"data": {}
+"code": 404,
+"message": "The requested resource wasn't found.",
+"data": {}
+Create record
+Creates a new collection Record.
+Depending on the collection&#39;s createRule value, the access to this action may or may not
+have been restricted.
+You could find individual generated records API documentation from the admin UI.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const record = await pb.collection('demo').create({
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final record = await pb.collection('demo').create(body: {
+POST
+/api/collections/`collectionIdOrName`/records
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the record&#39;s collection.
+Body Parameters
+Param
+Type
+Description
+Optional
+String
+15 characters string to store as record ID.
+If not set, it will be auto generated.
+Schema fields
+Any field from the collection&#39;s schema.
+Auth record fields
+Optional
+username
+String
+The username of the auth record.
+If not set, it will be auto generated.
+Optional
+email
+String
+Auth record email address.
+Optional
+emailVisibility
+Boolean
+Whether to show/hide the auth record email when fetching the record data.
+Required
+password
+String
+Auth record password.
+Required
+passwordConfirm
+String
+Auth record password confirmation.
+Optional
+verified
+Boolean
+Indicates whether the auth record is verified or not.
+This field can be set only by admins or auth records with &quot;Manage&quot; access.
+Body parameters could be sent as JSON or
+multipart/form-data.
+File upload is supported only through multipart/form-data.
+Query parameters
+Param
+Type
+Description
+expand
+String
+Auto expand record relations. Ex.:
+`?expand=relField1,relField2.subRelField`
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+`expand` property (eg. `"expand": {"relField1": {...}, ...}`).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Responses
+"@collectionId": "a98f514eb05f454",
+"@collectionName": "demo",
+"id": "ae40239d2bc4477",
+"updated": "2022-06-25 11:03:50.052",
+"created": "2022-06-25 11:03:35.163",
+"code": 400,
+"message": "Failed to create record.",
+"data": {
+"title": {
+"code": "validation_required",
+"message": "Missing required value."
+"code": 403,
+"message": "Only admins can perform this action.",
+"data": {}
+"code": 404,
+"message": "The requested resource wasn't found. Missing collection context.",
+"data": {}
+Update record
+Updates an existing collection Record.
+Depending on the collection&#39;s updateRule value, the access to this action may or may not
+have been restricted.
+You could find individual generated records API documentation from the admin UI.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const record = await pb.collection('demo').update('YOUR_RECORD_ID', {
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final record = await pb.collection('demo').update('YOUR_RECORD_ID', body: {
+PATCH
+/api/collections/`collectionIdOrName`/records/`recordId`
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the record&#39;s collection.
+recordId
+String
+ID of the record to update.
+Body Parameters
+Param
+Type
+Description
+Schema fields
+Any field from the collection&#39;s schema.
+Auth record fields
+Optional
+username
+String
+The username of the auth record.
+Optional
+email
+String
+The auth record email address.
+This field can be updated only by admins or auth records with &quot;Manage&quot; access.
+Regular accounts can update their email by calling &quot;Request email change&quot;.
+Optional
+emailVisibility
+Boolean
+Whether to show/hide the auth record email when fetching the record data.
+Optional
+oldPassword
+String
+Old auth record password.
+This field is required only when changing the record password. Admins and auth records with
+&quot;Manage&quot; access can skip this field.
+Optional
+password
+String
+New auth record password.
+Optional
+passwordConfirm
+String
+New auth record password confirmation.
+Optional
+verified
+Boolean
+Indicates whether the auth record is verified or not.
+This field can be set only by admins or auth records with &quot;Manage&quot; access.
+Body parameters could be sent as JSON or
+multipart/form-data.
+File upload is supported only through multipart/form-data.
+Query parameters
+Param
+Type
+Description
+expand
+String
+Auto expand record relations. Ex.:
+`?expand=relField1,relField2.subRelField`
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+`expand` property (eg. `"expand": {"relField1": {...}, ...}`).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Responses
+"@collectionId": "a98f514eb05f454",
+"@collectionName": "demo",
+"id": "ae40239d2bc4477",
+"updated": "2022-06-25 11:03:50.052",
+"created": "2022-06-25 11:03:35.163",
+"code": 400,
+"message": "Failed to create record.",
+"data": {
+"title": {
+"code": "validation_required",
+"message": "Missing required value."
+"code": 403,
+"message": "Only admins can perform this action.",
+"data": {}
+"code": 404,
+"message": "The requested resource wasn't found. Missing collection context.",
+"data": {}
+Delete record
+Deletes a single collection Record by its ID.
+Depending on the collection&#39;s deleteRule value, the access to this action may or may not
+have been restricted.
+You could find individual generated records API documentation from the admin UI.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+await pb.collection('demo').delete('YOUR_RECORD_ID');
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+await pb.collection('demo').delete('YOUR_RECORD_ID');
+DELETE
+/api/collections/`collectionIdOrName`/records/`recordId`
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the record&#39;s collection.
+recordId
+String
+ID of the record to delete.
+Responses
+`null`
+"code": 400,
+"message": "Failed to delete record. Make sure that the record is not part of a required relation reference.",
+"data": {}
+"code": 403,
+"message": "Only admins can perform this action.",
+"data": {}
+"code": 404,
+"message": "The requested resource wasn't found.",
+"data": {}
+### Auth record actions
+List auth methods
+Returns a public list with the allowed collection authentication methods.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const result = await pb.collection('users').listAuthMethods();
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final result = await pb.collection('users').listAuthMethods();
+GET
+/api/collections/`collectionIdOrName`/auth-methods
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Query parameters
+Param
+Type
+Description
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Responses
+"usernamePassword": false,
+"emailPassword": true,
+"authProviders": [
+"name": "github",
+"state": "3Yd8jNkK_6PJG6hPWwBjLqKwse6Ejd",
+"codeVerifier": "KxFDWz1B3fxscCDJ_9gHQhLuh__ie7",
+"codeChallenge": "NM1oVexB6Q6QH8uPtOUfK7tq4pmu4Jz6lNDIwoxHZNE=",
+"codeChallengeMethod": "S256",
+"authUrl": "https://github.com/login/oauth/authorize?client_id=demo&amp;code_challenge=NM1oVexB6Q6QH8uPtOUfK7tq4pmu4Jz6lNDIwoxHZNE%3D&amp;code_challenge_method=S256&amp;response_type=code&amp;scope=user&amp;state=3Yd8jNkK_6PJG6hPWwBjLqKwse6Ejd&amp;redirect_uri="
+"name": "gitlab",
+"state": "NeQSbtO5cShr_mk5__3CUukiMnymeb",
+"codeVerifier": "ahTFHOgua8mkvPAlIBGwCUJbWKR_xi",
+"codeChallenge": "O-GATkTj4eXDCnfonsqGLCd6njvTixlpCMvy5kjgOOg=",
+"codeChallengeMethod": "S256",
+"authUrl": "https://gitlab.com/oauth/authorize?client_id=demo&amp;code_challenge=O-GATkTj4eXDCnfonsqGLCd6njvTixlpCMvy5kjgOOg%3D&amp;code_challenge_method=S256&amp;response_type=code&amp;scope=read_user&amp;state=NeQSbtO5cShr_mk5__3CUukiMnymeb&amp;redirect_uri="
+"name": "google",
+"state": "zB3ZPifV1TW2GMuvuFkamSXfSNkHPQ",
+"codeVerifier": "t3CmO5VObGzdXqieakvR_fpjiW0zdO",
+"codeChallenge": "KChwoQPKYlz2anAdqtgsSTdIo8hdwtc1fh2wHMwW2Yk=",
+"codeChallengeMethod": "S256",
+"authUrl": "https://accounts.google.com/o/oauth2/auth?client_id=demo&amp;code_challenge=KChwoQPKYlz2anAdqtgsSTdIo8hdwtc1fh2wHMwW2Yk%3D&amp;code_challenge_method=S256&amp;response_type=code&amp;scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&amp;state=zB3ZPifV1TW2GMuvuFkamSXfSNkHPQ&amp;redirect_uri="
+Auth with password
+Authenticate a single auth record by their username/email and password.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const authData = await pb.collection('users').authWithPassword(
+'YOUR_USERNAME_OR_EMAIL',
+'YOUR_PASSWORD',
+// after the above you can also access the auth data from the authStore
+console.log(pb.authStore.isValid);
+console.log(pb.authStore.token);
+console.log(pb.authStore.model.id);
+// "logout" the last authenticated account
+pb.authStore.clear();
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final authData = await pb.collection('users').authWithPassword(
+'YOUR_USERNAME_OR_EMAIL',
+'YOUR_PASSWORD',
+// after the above you can also access the auth data from the authStore
+print(pb.authStore.isValid);
+print(pb.authStore.token);
+print(pb.authStore.model.id);
+// "logout" the last authenticated account
+pb.authStore.clear();
+POST
+/api/collections/`collectionIdOrName`/auth-with-password
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Body Parameters
+Param
+Type
+Description
+Required
+identity
+String
+Auth record username or email address.
+Required
+password
+String
+Auth record password.
+Body parameters could be sent as JSON or
+multipart/form-data.
+Query parameters
+Param
+Type
+Description
+expand
+String
+Auto expand record relations. Ex.:
+`?expand=relField1,relField2.subRelField`
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+`expand` property (eg. `"expand": {"relField1": {...}, ...}`).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,record.expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,record.description:excerpt(200,true)
+Responses
+"token": "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjRxMXhsY2xtZmxva3UzMyIsInR5cGUiOiJhdXRoUmVjb3JkIiwiY29sbGVjdGlvbklkIjoiX3BiX3VzZXJzX2F1dGhfIiwiZXhwIjoyMjA4OTg1MjYxfQ.UwD8JvkbQtXpymT09d7J6fdA0aP9g4FJ1GPh_ggEkzc",
+"record": {
+"id": "8171022dc95a4ed",
+"collectionId": "d2972397d45614e",
+"collectionName": "users",
+"created": "2022-06-24 06:24:18.434Z",
+"updated": "2022-06-24 06:24:18.889Z",
+"verified": false,
+"emailVisibility": true,
+"someCustomField": "example 123"
+"code": 400,
+"message": "An error occurred while submitting the form.",
+"data": {
+"password": {
+"code": "validation_required",
+"message": "Missing required value."
+Auth with OAuth2
+Authenticate with an OAuth2 provider and returns a new auth token and record data.
+This action usually should be called right after the provider login page redirect.
+You could also check the
+OAuth2 web integration example.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const authData = await pb.collection('users').authWithOAuth2Code(
+'google',
+'CODE',
+'VERIFIER',
+'REDIRECT_URL',
+// optional data that will be used for the new account on OAuth2 sign-up
+'name': 'test',
+// after the above you can also access the auth data from the authStore
+console.log(pb.authStore.isValid);
+console.log(pb.authStore.token);
+console.log(pb.authStore.model.id);
+// "logout" the last authenticated account
+pb.authStore.clear();
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final authData = await pb.collection('users').authWithOAuth2Code(
+'google',
+'CODE',
+'VERIFIER',
+'REDIRECT_URL',
+// optional data that will be used for the new account on OAuth2 sign-up
+createData: {
+'name': 'test',
+// after the above you can also access the auth data from the authStore
+print(pb.authStore.isValid);
+print(pb.authStore.token);
+print(pb.authStore.model.id);
+// "logout" the last authenticated account
+pb.authStore.clear();
+POST
+/api/collections/`collectionIdOrName`/auth-with-oauth2
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Body Parameters
+Param
+Type
+Description
+Required
+provider
+String
+The name of the OAuth2 client provider (eg. &quot;google&quot;).
+Required
+code
+String
+The authorization code returned from the initial request.
+Required
+codeVerifier
+String
+The code verifier sent with the initial request as part of the code_challenge.
+Required
+redirectUrl
+String
+The redirect url sent with the initial request.
+Optional
+createData
+Object
+Optional data that will be used when creating the auth record on OAuth2 sign-up.
+The created auth record must comply with the same requirements and validations in the
+regular create action.
+The data can only be in json, aka. multipart/form-data and
+files upload currently are not supported during OAuth2 sign-ups.
+Body parameters could be sent as JSON or
+multipart/form-data.
+Query parameters
+Param
+Type
+Description
+expand
+String
+Auto expand record relations. Ex.:
+`?expand=relField1,relField2.subRelField`
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+`expand` property (eg. `"expand": {"relField1": {...}, ...}`).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,record.expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,record.description:excerpt(200,true)
+Responses
+"token": "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjRxMXhsY2xtZmxva3UzMyIsInR5cGUiOiJhdXRoUmVjb3JkIiwiY29sbGVjdGlvbklkIjoiX3BiX3VzZXJzX2F1dGhfIiwiZXhwIjoyMjA4OTg1MjYxfQ.UwD8JvkbQtXpymT09d7J6fdA0aP9g4FJ1GPh_ggEkzc",
+"record": {
+"id": "8171022dc95a4ed",
+"collectionId": "d2972397d45614e",
+"collectionName": "users",
+"created": "2022-06-24 06:24:18.434Z",
+"updated": "2022-06-24 06:24:18.889Z",
+"verified": true,
+"emailVisibility": false,
+"someCustomField": "example 123"
+"meta": {
+"id": "abc123",
+"name": "John Doe",
+"username": "john.doe",
+"isNew": false,
+"accessToken": "...",
+"refreshToken": "...",
+"expiry": "..."
+"code": 400,
+"message": "An error occurred while submitting the form.",
+"data": {
+"provider": {
+"code": "validation_required",
+"message": "Missing required value."
+Auth refresh
+Returns a new auth response (token and user data) for already authenticated auth record.
+stored data in pb.authStore is still valid and up-to-date.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const authData = await pb.collection('users').authRefresh();
+// after the above you can also access the refreshed auth data from the authStore
+console.log(pb.authStore.isValid);
+console.log(pb.authStore.token);
+console.log(pb.authStore.model.id);
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final authData = await pb.collection('users').authRefresh();
+// after the above you can also access the refreshed auth data from the authStore
+print(pb.authStore.isValid);
+print(pb.authStore.token);
+print(pb.authStore.model.id);
+POST
+/api/collections/`collectionIdOrName`/auth-refresh
+Requires `Authorization: TOKEN`
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Query parameters
+Param
+Type
+Description
+expand
+String
+Auto expand record relations. Ex.:
+`?expand=relField1,relField2.subRelField`
+Supports up to 6-levels depth nested relations expansion.
+The expanded relations will be appended to the record under the
+`expand` property (eg. `"expand": {"relField1": {...}, ...}`).
+Only the relations to which the request user has permissions to view will
+be expanded.
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,record.expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,record.description:excerpt(200,true)
+Responses
+"token": "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjRxMXhsY2xtZmxva3UzMyIsInR5cGUiOiJhdXRoUmVjb3JkIiwiY29sbGVjdGlvbklkIjoiX3BiX3VzZXJzX2F1dGhfIiwiZXhwIjoyMjA4OTg1MjYxfQ.UwD8JvkbQtXpymT09d7J6fdA0aP9g4FJ1GPh_ggEkzc",
+"record": {
+"id": "8171022dc95a4ed",
+"collectionId": "d2972397d45614e",
+"collectionName": "users",
+"created": "2022-06-24 06:24:18.434Z",
+"updated": "2022-06-24 06:24:18.889Z",
+"verified": false,
+"emailVisibility": true,
+"someCustomField": "example 123"
+"code": 401,
+"message": "The request requires valid record authorization token to be set.",
+"data": {}
+"code": 403,
+"message": "The authorized record model is not allowed to perform this action.",
+"data": {}
+"code": 404,
+"message": "Missing auth record context.",
+"data": {}
+Request verification
+Sends auth record verification email request.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+POST
+/api/collections/`collectionIdOrName`/request-verification
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Body Parameters
+Param
+Type
+Description
+Required
+email
+String
+The email address to send the password reset request (if registered).
+Body parameters could be sent as JSON or
+multipart/form-data.
+Responses
+`null`
+"code": 400,
+"message": "An error occurred while submitting the form.",
+"data": {
+"email": {
+"code": "validation_required",
+"message": "Missing required value."
+Confirm verification
+Confirms an email address verification request.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+await pb.collection('users').confirmVerification('TOKEN');
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+await pb.collection('users').confirmVerification('TOKEN');
+POST
+/api/collections/`collectionIdOrName`/confirm-verification
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Body Parameters
+Param
+Type
+Description
+Required
+token
+String
+The token from the verification request email.
+Body parameters could be sent as JSON or
+multipart/form-data.
+Responses
+`null`
+"code": 400,
+"message": "An error occurred while submitting the form.",
+"data": {
+"token": {
+"code": "validation_required",
+"message": "Missing required value."
+Request password reset
+Sends a password reset email to a specified auth record email.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+POST
+/api/collections/`collectionIdOrName`/request-password-reset
+Body Parameters
+Param
+Type
+Description
+Required
+email
+String
+The email address to send the password reset request (if registered).
+Body parameters could be sent as JSON or
+multipart/form-data.
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Responses
+`null`
+"code": 400,
+"message": "An error occurred while submitting the form.",
+"data": {
+"email": {
+"code": "validation_required",
+"message": "Missing required value."
+Confirm password reset
+Confirms a password reset request and sets a new auth record password.
+invalidated.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+await pb.collection('users').confirmPasswordReset('TOKEN', '1234567890', '1234567890');
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+await pb.collection('users').confirmPasswordReset('TOKEN', '1234567890', '1234567890');
+POST
+/api/collections/`collectionIdOrName`/confirm-password-reset
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Body Parameters
+Param
+Type
+Description
+Required
+token
+String
+The token from the password reset request email.
+Required
+password
+String
+The new auth record password to set.
+Required
+passwordConfirm
+String
+New auth record password confirmation.
+Body parameters could be sent as JSON or
+multipart/form-data.
+Responses
+`null`
+"code": 400,
+"message": "An error occurred while submitting the form.",
+"data": {
+"password": {
+"code": "validation_required",
+"message": "Missing required value."
+Request email change
+Sends an email change request for an authenticated record.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+POST
+/api/collections/`collectionIdOrName`/request-email-change
+Requires record `Authorization:TOKEN` header
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Body Parameters
+Param
+Type
+Description
+Required
+newEmail
+String
+The new email address to send the change email request.
+Body parameters could be sent as JSON or
+multipart/form-data.
+Responses
+`null`
+"code": 400,
+"message": "An error occurred while submitting the form.",
+"data": {
+"newEmail": {
+"code": "validation_required",
+"message": "Missing required value."
+"code": 401,
+"message": "The request requires valid record authorization token to be set.",
+"data": {}
+"code": 403,
+"message": "You are not allowed to perform this request.",
+"data": {}
+Confirm email change
+Confirms email address change.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+await pb.collection('users').confirmEmailChange('TOKEN', 'YOUR_PASSWORD');
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+await pb.collection('users').confirmEmailChange('TOKEN', 'YOUR_PASSWORD');
+POST
+/api/collections/`collectionIdOrName`/confirm-email-change
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+Body Parameters
+Param
+Type
+Description
+Required
+token
+String
+The token from the change email request.
+Required
+password
+String
+The auth record password to confirm the email address change.
+Body parameters could be sent as JSON or
+multipart/form-data.
+Responses
+`null`
+"code": 400,
+"message": "An error occurred while submitting the form.",
+"data": {
+"token": {
+"code": "validation_required",
+"message": "Missing required value."
+List linked external auth providers
+Return a list with all external auth providers linked to a single record.
+Only admins and the account owner can access this action.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const result = await pb.collection('users').listExternalAuths(pb.authStore.model.id);
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final result = await pb.collection('users').listExternalAuths(pb.authStore.model.id);
+GET
+/api/collections/`collectionIdOrName`/records/`id`/external-auths
+Requires `Authorization: TOKEN`
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+String
+ID of the auth record.
+Query parameters
+Param
+Type
+Description
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Responses
+"id": "8171022dc95a4e8",
+"created": "2022-09-01 10:24:18.434",
+"updated": "2022-09-01 10:24:18.889",
+"recordId": "e22581b6f1d44ea",
+"collectionId": "systemprofiles0",
+"provider": "google",
+"providerId": "2da15468800514p"
+"id": "171022dc895a4e8",
+"created": "2022-09-01 10:24:18.434",
+"updated": "2022-09-01 10:24:18.889",
+"recordId": "e22581b6f1d44ea",
+"collectionId": "systemprofiles0",
+"provider": "twitter",
+"providerId": "720688005140514"
+"code": 401,
+"message": "The request requires admin or record authorization token to be set.",
+"data": {}
+"code": 403,
+"message": "You are not allowed to perform this request.",
+"data": {}
+"code": 404,
+"message": "The requested resource wasn't found.",
+"data": {}
+Unlink external auth provider
+Unlink a single external OAuth2 provider from an auth record.
+Only admins and the account owner can access this action.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+await pb.collection('users').unlinkExternalAuth(pb.authStore.model.id, 'google');
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+await pb.collection('users').unlinkExternalAuth(pb.authStore.model.id, 'google');
+DELETE
+/api/collections/`collectionIdOrName`/records/`id`/external-auths/`provider`
+*`Authorization: TOKEN`
+Path parameters
+Param
+Type
+Description
+collectionIdOrName
+String
+ID or name of the auth collection.
+String
+ID of the auth record.
+provider
+String
+The name of the auth provider to unlink, eg. `google`, `twitter`,
+`github`, etc.
+Responses
+`null`
+"code": 401,
+"message": "The request requires valid record authorization token to be set.",
+"data": {}
+"code": 403,
+"message": "You are not allowed to perform this request.",
+"data": {}
+"code": 404,
+"message": "Missing external auth provider relation.",
+"data": {}

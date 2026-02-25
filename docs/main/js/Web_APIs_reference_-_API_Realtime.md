@@ -1,0 +1,125 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Web APIs reference - API Realtime
+Required
+clientId(String):ID of the SSE client connection.
+Optional
+subscriptions(Array<String>):The new client subscriptions to set in the format:
+COLLECTION_ID_OR_NAME or
+COLLECTION_ID_OR_NAME/RECORD_ID.
+You can also attach optional query and header parameters as serialized json to a
+single topic using the options
+query parameter, eg.:
+COLLECTION_ID_OR_NAME/RECORD_ID?options={"query": {"abc": "123"}, "headers": {"x-token": "..."}}
+Leave empty to unsubscribe from everything.
+# Web APIs reference - API Realtime
+- **Required
+clientId** (String): ID of the SSE client connection.
+- **Optional
+subscriptions** (Array<String>): The new client subscriptions to set in the format:
+COLLECTION_ID_OR_NAME or
+COLLECTION_ID_OR_NAME/RECORD_ID.
+You can also attach optional query and header parameters as serialized json to a
+single topic using the options
+query parameter, eg.:
+COLLECTION_ID_OR_NAME/RECORD_ID?options={"query": {"abc": "123"}, "headers": {"x-token": "..."}}
+Leave empty to unsubscribe from everything.
+The Realtime API is implemented via Server-Sent Events (SSE). Generally, it consists of 2 operations:
+-establish SSE connection
+-submit client subscriptions
+SSE events are sent for create, update
+and delete record operations.
+You could subscribe to a single record or to an entire collection.
+When you subscribe to a single record, the collection&#39;s
+ViewRule will be used to determine whether the subscriber has access to receive the
+event message.
+When you subscribe to an entire collection, the collection&#39;s
+ListRule will be used to determine whether the subscriber has access to receive the
+event message.
+Connect
+GET
+/api/realtime
+Establishes a new SSE connection and immediately sends a PB_CONNECT SSE event with the
+created client ID.
+NB! The user/admin authorization happens during the first
+Set subscriptions
+call.
+If the connected client doesn&#39;t receive any new messages for 5 minutes, the server will send a
+disconnect signal (this is to prevent forgotten/leaked connections). The connection will be
+automatically reestablished if the client is still active (eg. the browser tab is still open).
+Set subscriptions
+POST
+/api/realtime
+If Authorization header is set, will authorize the client SSE connection with the
+associated user or admin.
+Body Parameters
+Param
+Type
+Description
+Required
+clientId
+String
+ID of the SSE client connection.
+Optional
+subscriptions
+Array&lt;String>
+The new client subscriptions to set in the format:
+COLLECTION_ID_OR_NAME or
+COLLECTION_ID_OR_NAME/RECORD_ID.
+You can also attach optional query and header parameters as serialized json to a
+single topic using the options
+query parameter, eg.:
+COLLECTION_ID_OR_NAME/RECORD_ID?options={"query": {"abc": "123"}, "headers": {"x-token": "..."}}
+Leave empty to unsubscribe from everything.
+Body parameters could be sent as JSON or
+multipart/form-data.
+Responses
+`null`
+"code": 400,
+"message": "Something went wrong while processing your request.",
+"data": {
+"clientId": {
+"code": "validation_required",
+"message": "Missing required value."
+"code": 403,
+"data": {}
+"code": 404,
+"message": "Missing or invalid client id.",
+"data": {}
+All of this is seamlessly handled by the SDKs using just the subscribe and
+unsubscribe methods:
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+// (Optionally) authenticate
+// Subscribe to changes in any record in the collection
+pb.collection('example').subscribe('*', function (e) {
+console.log(e.action);
+console.log(e.record);
+}, { /* other options like expand, custom headers, etc. */ });
+// Subscribe to changes only in the specified record
+pb.collection('example').subscribe('RECORD_ID', function (e) {
+console.log(e.action);
+console.log(e.record);
+}, { /* other options like expand, custom headers, etc. */ });
+// Unsubscribe
+pb.collection('example').unsubscribe('RECORD_ID'); // remove all 'RECORD_ID' subscriptions
+pb.collection('example').unsubscribe('*'); // remove all '*' topic subscriptions
+pb.collection('example').unsubscribe(); // remove all subscriptions in the collection
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+// (Optionally) authenticate
+// Subscribe to changes in any record in the collection
+pb.collection('example').subscribe('*', (e) {
+print(e.action);
+print(e.record);
+}, /* other options like expand, custom headers, etc. */);
+// Subscribe to changes only in the specified record
+pb.collection('example').subscribe('RECORD_ID', (e) {
+print(e.action);
+print(e.record);
+}, /* other options like expand, custom headers, etc. */);
+// Unsubscribe
+pb.collection('example').unsubscribe('RECORD_ID'); // remove all 'RECORD_ID' subscriptions
+pb.collection('example').unsubscribe('*'); // remove all '*' topic subscriptions
+pb.collection('example').unsubscribe(); // remove all subscriptions in the collection

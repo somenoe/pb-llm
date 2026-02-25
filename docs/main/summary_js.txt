@@ -1,0 +1,83 @@
+================================================================================
+POCKETBASE DOCUMENTATION SCRAPING SUMMARY FOR LLM USAGE
+================================================================================
+Generated: 2026-02-25 12:41:03
+Total Sections: 31
+Purpose: LLM Training & Context Enhancement
+
+🤖 LLM USAGE STATISTICS
+================================================================================
+📊 Total Estimated Tokens: 48,415
+🔧 LLM-Ready Tokens: 56,731
+📈 Avg Tokens/Section: 1,830
+📖 Context Window Usage (120K): ~47.3%
+📖 Context Window Usage (200K): ~28.4%
+🎯 Compression Ratio: 117.2% (clean vs raw)
+
+📊 PROCESSING STATISTICS
+================================================================================
+✅ Successful: 31/31 sections (100.0%)
+❌ Failed: 0/31 sections (0.0%)
+
+📈 CONTENT INSIGHTS
+================================================================================
+📄 Largest Section: Web APIs reference - API Records (9,820 tokens, 49,950 chars)
+📄 Smallest Section: Client-side SDKs (99 tokens, 613 chars)
+
+📂 CONTENT BY CATEGORY (with Token Analysis)
+================================================================================
+   Api: 10 sections, 35,026 tokens (61.7%), avg 3,502 tokens/section
+   Js-Extensions: 13 sections, 14,803 tokens (26.1%), avg 1,138 tokens/section
+   General: 8 sections, 6,902 tokens (12.2%), avg 862 tokens/section
+
+📊 LEGACY STATISTICS
+================================================================================
+📝 Total content: 257,046 characters
+🔧 Total parameters: 284
+
+🌐 API METHODS FOUND
+================================================================================
+   POST: 1 endpoints
+   GET: 1 endpoints
+
+✅ SUCCESSFUL SECTIONS
+================================================================================
+[1] Introduction (291 tokens, 1725 chars, 0 params)
+[2] Collections (1,123 tokens, 4636 chars, 14 params)
+[3] Client-side SDKs (99 tokens, 475 chars, 0 params)
+[4] Authentication (1,479 tokens, 8232 chars, 0 params)
+[5] Files upload and handling (1,338 tokens, 7671 chars, 0 params)
+[6] Working with relations (1,150 tokens, 6107 chars, 0 params)
+[7] Use as framework (437 tokens, 2478 chars, 0 params)
+[8] Going to production (985 tokens, 6233 chars, 0 params)
+[9] API rules and filters (1,327 tokens, 8147 chars, 0 params)
+[10] Web APIs reference - API Records (9,820 tokens, 36449 chars, 74 params)
+[11] Web APIs reference - API Realtime (865 tokens, 4181 chars, 2 params)
+[12] Web APIs reference - API Files (746 tokens, 2016 chars, 6 params)
+[13] Web APIs reference - API Admins (4,599 tokens, 16403 chars, 29 params)
+[14] Web APIs reference - API Collections (6,987 tokens, 23180 chars, 55 params)
+[15] Web APIs reference - API Settings (5,697 tokens, 18114 chars, 87 params)
+[16] Web APIs reference - API Logs (3,222 tokens, 9128 chars, 9 params)
+[17] Web APIs reference - API Backups (1,507 tokens, 6758 chars, 7 params)
+[18] Web APIs reference - API Health (256 tokens, 603 chars, 1 params)
+[19] Extend with JavaScript - Overview (970 tokens, 6193 chars, 0 params)
+[20] Extend with JavaScript - Event hooks (5,920 tokens, 43561 chars, 0 params)
+[21] Extend with JavaScript - Routing (1,389 tokens, 8392 chars, 0 params)
+[22] Extend with JavaScript - Database (2,106 tokens, 11022 chars, 0 params)
+[23] Extend with JavaScript - Record operations (1,550 tokens, 9472 chars, 0 params)
+[24] Extend with JavaScript - Collection operations (493 tokens, 2960 chars, 0 params)
+[25] Extend with JavaScript - Migrations (719 tokens, 4624 chars, 0 params)
+[26] Extend with JavaScript - Jobs scheduling (140 tokens, 658 chars, 0 params)
+[27] Extend with JavaScript - Console commands (112 tokens, 498 chars, 0 params)
+[28] Extend with JavaScript - Sending emails (248 tokens, 1386 chars, 0 params)
+[29] Extend with JavaScript - Sending HTTP requests (387 tokens, 2011 chars, 0 params)
+[30] Extend with JavaScript - Rendering templates (360 tokens, 1726 chars, 0 params)
+[31] Extend with JavaScript - Logging (409 tokens, 2007 chars, 0 params)
+
+🔧 CUSTOM PACKAGES INTEGRATED
+================================================================================
+No custom packages found.
+
+================================================================================
+END OF SUMMARY
+================================================================================

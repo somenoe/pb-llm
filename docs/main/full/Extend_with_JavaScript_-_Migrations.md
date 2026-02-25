@@ -1,0 +1,94 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Extend with JavaScript - Migrations
+# Extend with JavaScript - Migrations
+PocketBase comes with a builtin DB and data migration utility, allowing you to version your DB structure,
+create collections programmatically, initialize default settings and/or run anything that needs to be
+executed only once.
+The user defined migrations are located in pb_migrations directory (it can be changed using
+the
+--migrationsDir flag) and each unapplied migration inside it will be executed automatically
+in a transaction on serve (or on migrate up).
+The generated migrations are safe to be commited to version control and can be shared with your other team
+members.
+### Automigrate
+The prebuilt executable has the --automigrate flag enabled by default, meaning that every collection
+configuration change from the Admin UI will generate the related migration file automatically for you.
+### Creating migrations
+To create a new blank migration you can run migrate create.
+`[root@dev app]$ ./pocketbase migrate create "your_new_migration"`
+// pb_migrations/1687801097_your_new_migration.js
+migrate((db) => {
+// add up queries...
+}, (db) => {
+// add down queries...
+New migrations are applied automatically on serve.
+Optionally, you could apply new migrations manually by running migrate up.
+To revert the last applied migration(s), you could run migrate down [number].
+##### Migration file
+Each migration file should have a single migrate(upFunc, downFunc) call.
+In the migration file, you are expected to write your &quot;upgrade&quot; code in the upFunc callback.
+The downFunc is optional and it should contains the &quot;downgrade&quot; operations to revert the
+changes made by the
+upFunc.
+Both callbacks accept a single db argument (dbx.Builder) that you can use
+directly or create a Dao instance and use its available helpers. You can explore the
+Database guide
+for more details how to operate with the db object and its available methods.
+### Collections snapshot
+PocketBase comes also with a migrate collections command that will generate a full snapshot of
+your current Collections configuration without having to type it manually:
+`[root@dev app]$ ./pocketbase migrate collections`
+Similar to the migrate create command, this will generate a new migration file in the
+pb_migrations directory.
+It is safe to run the command multiple times and generate multiple snapshot migration files.
+### Migrations history
+All applied migration filenames are stored in the internal _migrations table.
+During local development often you might end up making various collection changes to test different approaches.
+When --automigrate is enabled (which is the default) this could lead in a migration
+history with unnecessary intermediate steps that may not be wanted in the final migration history.
+To avoid the clutter and to prevent applying the intermediate steps in production, you can remove (or
+squash) the unnecessary migration files manually and then update the local migrations history by running:
+`[root@dev app]$ ./pocketbase migrate history-sync`
+The above command will remove any entry from the _migrations table that doesn&#39;t have a related
+migration file associated with it.
+// pb_migrations/1687801090_set_pending_status.js
+// set a default "pending" status to all empty status articles
+migrate((db) => {
+db.newQuery("UPDATE articles SET status = 'pending' WHERE status = ''")
+.execute()
+##### Initialize default application settings
+// pb_migrations/1687801090_initial_settings.js
+migrate((db) => {
+const dao = new Dao(db);
+const settings = dao.findSettings()
+settings.meta.appName = "test"
+settings.logs.maxDays = 2
+dao.saveSettings(settings)
+##### Creating new admin
+// pb_migrations/1687801090_initial_admin.js
+migrate((db) => {
+const dao = new Dao(db);
+const admin = new Admin();
+admin.setPassword("1234567890")
+dao.saveAdmin(admin)
+}, (db) => { // optional revert
+const dao = new Dao(db);
+try {
+dao.deleteAdmin(admin)
+} catch (_) { /* most likely already deleted */ }
+##### Creating new auth record
+// pb_migrations/1687801090_new_users_record.js
+migrate((db) => {
+const dao = new Dao(db);
+const collection = dao.findCollectionByNameOrId("users")
+const record = new Record(collection)
+record.setUsername("u_" + $security.randomStringWithAlphabet(5, "123456789"))
+record.setPassword("1234567890")
+record.set("name", "John Doe")
+dao.saveRecord(record)
+}, (db) => { // optional revert
+const dao = new Dao(db);
+try {
+dao.deleteRecord(record)
+} catch (_) { /* most likely already deleted */ }

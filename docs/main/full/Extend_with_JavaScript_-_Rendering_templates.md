@@ -1,0 +1,68 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Extend with JavaScript - Rendering templates
+Response 200:
+{{template "placeholderName" .}}
+Response 200:
+{{block "placeholderName" .}}default...{{end}}
+Response 200:
+{{define "placeholderName"}}custom...{{end}}
+# Extend with JavaScript - Rendering templates
+### Overview
+A common task when creating custom routes or emails is the need of generating HTML output. To assist with
+this, PocketBase provides the global $template helper for parsing and rendering HTML templates.
+const html = $template.loadFiles(
+`${__hooks}/views/base.html`,
+`${__hooks}/views/partial1.html`,
+`${__hooks}/views/partial2.html`,
+).render(data)
+The general flow when working with composed and nested templates is that you create &quot;base&quot; template(s)
+The dot object (.) in the above represents the data passed to the templates
+via the render(data) method.
+By default the templates apply contextual (HTML, JS, CSS, URI) auto escaping so the generated template
+For more information about the template syntax please refer to the
+html/template
+and
+text/template
+package godocs.
+Another great resource is also the Hashicorp&#39;s
+Learn Go Template Syntax
+tutorial.
+### Example HTML page with layout
+Consider the following app directory structure:
+myapp/
+pb_hooks/
+views/
+layout.html
+hello.html
+main.pb.js
+pocketbase
+We define the content for layout.html as:
+&lt;!DOCTYPE html>
+&lt;html lang="en">
+&lt;head>
+&lt;title>{{block "title" .}}Default app title{{end}}&lt;/title>
+&lt;/head>
+&lt;body>
+Header...
+{{block "body" .}}
+Default app body...
+{{end}}
+&lt;/body>
+&lt;/html>
+We define the content for hello.html as:
+{{define "title"}}
+Page 1
+{{end}}
+{{define "body"}}
+&lt;p>Hello from {{.name}}&lt;/p>
+{{end}}
+Then to output the final page, we&#39;ll register a custom /hello/:name route:
+routerAdd("get", "/hello/:name", (c) => {
+const name = c.pathParam("name")
+const html = $template.loadFiles(
+`${__hooks}/views/layout.html`,
+`${__hooks}/views/hello.html`,
+).render({
+"name": name,
+return c.html(200, html)

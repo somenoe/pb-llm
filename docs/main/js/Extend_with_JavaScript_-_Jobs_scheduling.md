@@ -1,0 +1,17 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Extend with JavaScript - Jobs scheduling
+# Extend with JavaScript - Jobs scheduling
+If you have tasks that need to be performed periodically, you could setup crontab-like jobs with
+cronAdd(name, expr, handler).
+Each scheduled job runs in its own goroutine as part of the serve command process and must have:
+-name - identifier for the scheduled job; could be used to replace or remove an existing job
+-cron expression like 0 0 * * * (
+supports numeric list, steps, ranges or
+macros
+-handler - the function that will be executed everytime when the job runs
+Here is an example:
+// prints "Hello!" every 2 minutes
+cronAdd("hello", "*/2 * * * *", () => {
+console.log("Hello!")
+To remove a single registered cron job you can call cronRemove(name).

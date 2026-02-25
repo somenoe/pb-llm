@@ -1,0 +1,593 @@
+POCKETBASE DOCUMENTATION
+==================================================
+
+Generated: 2026-02-25 12:41:03 | Sections: 1
+
+[1] Web APIs reference - API Logs
+URL: https://pocketbase.io/old/docs/api-logs/
+Category: api
+API: POST /api/collections/users/auth-with-password"
+Parameters:
+- page (Number): The page (aka. offset) of the paginated list (default to 1).
+- perPage (Number): The max returned logs per page (default to 30).
+- sort (String): Specify the ORDER BY fields.
+Add - / + (default) in front of the attribute for DESC /
+ASC order, eg.:
+// DESC by the insertion rowid and ASC by level
+?sort=-rowid,level
+Supported log sort fields:
+@random, rowid, id, created,
+updated, level, message and any
+data.* attribute.
+- filter (String): Filter expression to filter/search the returned logs list, eg.:
+?filter=(data.url~'test.com' && level>0)
+Supported log filter fields:
+id, created, updated,
+level, message and any data.* attribute.
+The syntax basically follows the format
+OPERAND
+OPERATOR
+OPERAND, where:
+OPERAND - could be any of the above field literal, string (single or double
+quoted), number, null, true, false
+OPERATOR - is one of:
+Equal
+!=
+NOT equal
+Greater than
+>=
+Greater than or equal
+Less than
+<=
+Less than or equal
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+!~
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+?=
+Any/At least one of
+Equal
+?!=
+Any/At least one of
+NOT equal
+?>
+Any/At least one of
+Greater than
+?>=
+Any/At least one of
+Greater than or equal
+?<
+Any/At least one of
+Less than
+?<=
+Any/At least one of
+Less than or equal
+?~
+Any/At least one of
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+?!~
+Any/At least one of
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+To group and combine several expressions you could use parenthesis
+(...), && (AND) and || (OR) tokens.
+Single line comments are also supported: // Example comment.
+- fields (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- id (String): ID of the log to view.
+- fields (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- filter (String): Filter expression to filter/search the logs, eg.:
+?filter=(data.url~'test.com' && level>0)
+Supported log filter fields:
+rowid, id, created,
+updated, level, message and any
+data.* attribute.
+The syntax basically follows the format
+OPERAND
+OPERATOR
+OPERAND, where:
+OPERAND - could be any of the above field literal, string (single or double
+quoted), number, null, true, false
+OPERATOR - is one of:
+Equal
+!=
+NOT equal
+Greater than
+>=
+Greater than or equal
+Less than
+<=
+Less than or equal
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+!~
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+?=
+Any/At least one of
+Equal
+?!=
+Any/At least one of
+NOT equal
+?>
+Any/At least one of
+Greater than
+?>=
+Any/At least one of
+Greater than or equal
+?<
+Any/At least one of
+Less than
+?<=
+Any/At least one of
+Less than or equal
+?~
+Any/At least one of
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+?!~
+Any/At least one of
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+To group and combine several expressions you could use parenthesis
+(...), && (AND) and || (OR) tokens.
+Single line comments are also supported: // Example comment.
+- fields (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+
+Content:
+# Web APIs reference - API Logs
+`POST /api/collections/users/auth-with-password"`
+- **page** (Number): The page (aka. offset) of the paginated list (default to 1).
+- **perPage** (Number): The max returned logs per page (default to 30).
+- **sort** (String): Specify the ORDER BY fields.
+Add - / + (default) in front of the attribute for DESC /
+ASC order, eg.:
+// DESC by the insertion rowid and ASC by level
+?sort=-rowid,level
+Supported log sort fields:
+@random, rowid, id, created,
+updated, level, message and any
+data.* attribute.
+- **filter** (String): Filter expression to filter/search the returned logs list, eg.:
+?filter=(data.url~'test.com' && level>0)
+Supported log filter fields:
+id, created, updated,
+level, message and any data.* attribute.
+The syntax basically follows the format
+OPERAND
+OPERATOR
+OPERAND, where:
+OPERAND - could be any of the above field literal, string (single or double
+quoted), number, null, true, false
+OPERATOR - is one of:
+Equal
+NOT equal
+Greater than
+Greater than or equal
+Less than
+Less than or equal
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+Any/At least one of
+Equal
+Any/At least one of
+NOT equal
+Any/At least one of
+Greater than
+Any/At least one of
+Greater than or equal
+Any/At least one of
+Less than
+Any/At least one of
+Less than or equal
+Any/At least one of
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+?!~
+Any/At least one of
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+To group and combine several expressions you could use parenthesis
+(...), && (AND) and || (OR) tokens.
+Single line comments are also supported: // Example comment.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- **id** (String): ID of the log to view.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+- **filter** (String): Filter expression to filter/search the logs, eg.:
+?filter=(data.url~'test.com' && level>0)
+Supported log filter fields:
+rowid, id, created,
+updated, level, message and any
+data.* attribute.
+The syntax basically follows the format
+OPERAND
+OPERATOR
+OPERAND, where:
+OPERAND - could be any of the above field literal, string (single or double
+quoted), number, null, true, false
+OPERATOR - is one of:
+Equal
+NOT equal
+Greater than
+Greater than or equal
+Less than
+Less than or equal
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+Any/At least one of
+Equal
+Any/At least one of
+NOT equal
+Any/At least one of
+Greater than
+Any/At least one of
+Greater than or equal
+Any/At least one of
+Less than
+Any/At least one of
+Less than or equal
+Any/At least one of
+Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for wildcard
+match)
+?!~
+Any/At least one of
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a "%" for
+wildcard match)
+To group and combine several expressions you could use parenthesis
+(...), && (AND) and || (OR) tokens.
+Single line comments are also supported: // Example comment.
+- **fields** (String): Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+List logs
+Returns a paginated logs list.
+Only admins can perform this action.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const pageResult = await pb.logs.getList(1, 20, {
+filter: 'data.status >= 400'
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final pageResult = await pb.logs.getList(
+page: 1,
+perPage: 20,
+filter: 'data.status >= 400',
+GET
+/api/logs
+Requires `Authorization: TOKEN`
+Query parameters
+Param
+Type
+Description
+page
+Number
+The page (aka. offset) of the paginated list (default to 1).
+perPage
+Number
+The max returned logs per page (default to 30).
+sort
+String
+Specify the ORDER BY fields.
+Add - / + (default) in front of the attribute for DESC /
+ASC order, eg.:
+// DESC by the insertion rowid and ASC by level
+?sort=-rowid,level
+Supported log sort fields:
+@random, rowid, id, created,
+updated, level, message and any
+data.* attribute.
+filter
+String
+Filter expression to filter/search the returned logs list, eg.:
+`?filter=(data.url~'test.com' &amp;&amp; level>0)`
+Supported log filter fields:
+id, created, updated,
+level, message and any data.* attribute.
+The syntax basically follows the format
+OPERAND
+OPERATOR
+OPERAND, where:
+-OPERAND - could be any of the above field literal, string (single or double
+quoted), number, null, true, false
+-OPERATOR - is one of:
+Equal
+NOT equal
+Greater than
+Greater than or equal
+-&lt;
+Less than
+-&lt;=
+Less than or equal
+Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for wildcard
+match)
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for
+wildcard match)
+Any/At least one of
+Equal
+Any/At least one of
+NOT equal
+Any/At least one of
+Greater than
+Any/At least one of
+Greater than or equal
+-?&lt;
+Any/At least one of
+Less than
+-?&lt;=
+Any/At least one of
+Less than or equal
+Any/At least one of
+Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for wildcard
+match)
+-?!~
+Any/At least one of
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for
+wildcard match)
+To group and combine several expressions you could use parenthesis
+(...), &amp;&amp; (AND) and || (OR) tokens.
+Single line comments are also supported: // Example comment.
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Responses
+"page": 1,
+"perPage": 20,
+"totalItems": 2,
+"items": [
+"id": "9ajmzgd99r039k9",
+"created": "2023-12-12 04:41:59.973Z",
+"updated": "2023-12-12 04:41:59.973Z",
+"data": {
+"auth": "authRecord",
+"execTime": 364.961387,
+"method": "POST",
+"remoteIp": "127.0.0.1",
+"status": 200,
+"type": "request",
+"url": "/old/api/collections/users/auth-with-password",
+"userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
+"userIp": "127.0.0.1"
+"message": "POST /api/collections/users/auth-with-password",
+"level": 0
+"id": "26apis4s3sm9yqm",
+"created": "2023-12-12 04:27:21.583Z",
+"updated": "2023-12-12 04:27:21.583Z",
+"data": {
+"auth": "authRecord",
+"execTime": 403.664712,
+"method": "POST",
+"remoteIp": "127.0.0.1",
+"status": 200,
+"type": "request",
+"url": "/old/api/collections/users/auth-with-password?expand=rel&amp;fields=*%2Crecord.*%2Crecord.expand.rel.id",
+"userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
+"userIp": "127.0.0.1"
+"message": "POST /api/collections/users/auth-with-password?expand=rel&amp;fields=*%2Crecord.*%2Crecord.expand.rel.id",
+"level": 0
+"code": 400,
+"message": "Something went wrong while processing your request. Invalid filter.",
+"data": {}
+"code": 401,
+"message": "The request requires admin authorization token to be set.",
+"data": {}
+"code": 403,
+"message": "You are not allowed to perform this request.",
+"data": {}
+View log
+Returns a single log by its ID.
+Only admins can perform this action.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const log = await pb.logs.getOne('LOG_ID');
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final log = await pb.logs.getOne('LOG_ID');
+GET
+/api/logs/`id`
+Requires `Authorization: TOKEN`
+Path parameters
+Param
+Type
+Description
+String
+ID of the log to view.
+Query parameters
+Param
+Type
+Description
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Responses
+"id": "twjnabervu5log8",
+"created": "2023-12-10 19:56:29.556Z",
+"updated": "2023-12-10 19:56:29.556Z",
+"data": {
+"auth": "guest",
+"execTime": 0.66452,
+"method": "GET",
+"remoteIp": "127.0.0.1",
+"status": 200,
+"type": "request",
+"url": "/old/api/collections/users/auth-methods",
+"userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
+"userIp": "127.0.0.1"
+"message": "GET /api/collections/users/auth-methods",
+"level": 0
+"code": 401,
+"message": "The request requires admin authorization token to be set.",
+"data": {}
+"code": 403,
+"message": "You are not allowed to perform this request.",
+"data": {}
+"code": 404,
+"message": "The requested resource wasn't found.",
+"data": {}
+Logs statistics
+Returns hourly aggregated logs statistics.
+Only admins can perform this action.
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+const stats = await pb.logs.getStats({
+filter: 'data.status >= 400'
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+final stats = await pb.logs.getStats(
+filter: 'data.status >= 400'
+GET
+/api/logs/stats
+Requires `Authorization: TOKEN`
+Query parameters
+Param
+Type
+Description
+filter
+String
+Filter expression to filter/search the logs, eg.:
+`?filter=(data.url~'test.com' &amp;&amp; level>0)`
+Supported log filter fields:
+rowid, id, created,
+updated, level, message and any
+data.* attribute.
+The syntax basically follows the format
+OPERAND
+OPERATOR
+OPERAND, where:
+-OPERAND - could be any of the above field literal, string (single or double
+quoted), number, null, true, false
+-OPERATOR - is one of:
+Equal
+NOT equal
+Greater than
+Greater than or equal
+-&lt;
+Less than
+-&lt;=
+Less than or equal
+Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for wildcard
+match)
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for
+wildcard match)
+Any/At least one of
+Equal
+Any/At least one of
+NOT equal
+Any/At least one of
+Greater than
+Any/At least one of
+Greater than or equal
+-?&lt;
+Any/At least one of
+Less than
+-?&lt;=
+Any/At least one of
+Less than or equal
+Any/At least one of
+Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for wildcard
+match)
+-?!~
+Any/At least one of
+NOT Like/Contains (if not specified auto wraps the right string OPERAND in a &quot;%&quot; for
+wildcard match)
+To group and combine several expressions you could use parenthesis
+(...), &amp;&amp; (AND) and || (OR) tokens.
+Single line comments are also supported: // Example comment.
+fields
+String
+Comma separated string of the fields to return in the JSON response
+(by default returns all fields). Ex.:
+?fields=*,expand.relField.name
+* targets all keys from the specific depth level.
+In addition, the following field modifiers are also supported:
+-:excerpt(maxLength, withEllipsis?)
+Returns a short plain text version of the field string value.
+Ex.:
+?fields=*,description:excerpt(200,true)
+Responses
+"total": 4,
+"date": "2022-06-01 19:00:00.000"
+"total": 1,
+"date": "2022-06-02 12:00:00.000"
+"total": 8,
+"date": "2022-06-02 13:00:00.000"
+"code": 400,
+"message": "Something went wrong while processing your request. Invalid filter.",
+"data": {}
+"code": 401,
+"message": "The request requires admin authorization token to be set.",
+"data": {}
+"code": 403,
+"message": "You are not allowed to perform this request.",
+"data": {}
+--------------------------------------------------------------------------------
+

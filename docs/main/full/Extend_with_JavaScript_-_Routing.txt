@@ -1,0 +1,186 @@
+POCKETBASE DOCUMENTATION
+==================================================
+
+Generated: 2026-02-25 12:41:03 | Sections: 1
+
+[1] Extend with JavaScript - Routing
+URL: https://pocketbase.io/old/docs/js-routing/
+Category: js-extensions
+API: GET /hello/:name
+
+Content:
+# Extend with JavaScript - Routing
+`GET /hello/:name`
+You can register custom routes and middlewares by using the top-level routerAdd()
+and routerUse() functions.
+### Routes
+##### Registering new routes
+Each route consists of at least a path and a handler function. For example, the below code registers
+GET /hello/:name route that responds with a json body:
+routerAdd("GET", "/hello/:name", (c) => {
+let name = c.pathParam("name")
+return c.json(200, { "message": "Hello " + name })
+}, /* optional middlewares */)
+To avoid collisions with future internal routes you should avoid using the /api/...
+base path or consider combining it with a unique prefix like /api/myapp/....
+Each handler function receives a request context argument (usually named c).
+The request context is also accessible in the event request hooks under the httpContext key.
+Below you can find common request context operations.
+##### Request context store
+The request context comes with a local store that you can use to share data related only to the current
+request between routes and middlewares.
+// store for the duration of the request
+c.set("someKey", 123)
+// retrieve later
+const val = c.get("someKey") // 123
+##### Retrieving the current auth state
+We also use the store to manage the current auth state with the admin and
+authRecord special keys.
+const admin  = c.get("admin")      // empty if not authenticated as admin
+const record = c.get("authRecord") // empty if not authenticated as regular auth record
+// alternatively, you can also read the auth state from the cached request info
+const info   = $apis.requestInfo(c);
+const admin  = info.admin;      // empty if not authenticated as admin
+const record = info.authRecord; // empty if not authenticated as regular auth record
+const isGuest = !admin &amp;&amp; !record
+##### Reading path parameters
+c.pathParam(&quot;paramName&quot;).
+`const id = c.pathParam("id")`
+##### Reading query parameters
+const search = c.queryParam("search")
+// or via the cached request object
+const search = $apis.requestInfo(c).query.search
+##### Reading request headers
+const token = c.request().header.get("Some-Header")
+// or via the cached request object (the header value is always normalized)
+const token = $apis.requestInfo(c).headers["some_header"]
+##### Writing response headers
+`c.response().header().set("Some-Header", "123")`
+##### Reading request body
+// read the body via the cached request object
+// (this method is commonly used in hook handlers because it allows reading the body more than once)
+const data = $apis.requestInfo(c).data
+console.log(data.title)
+// read/scan the request body fields into a typed object
+// (note that a body cannot be read twice with "bind" because it is a stream)
+const data = new DynamicModel({
+// describe the fields to read (used also as initial values)
+someTextField:   "",
+someNumberField: 0,
+someBoolField:   false,
+someArrayField:  [],
+someObjectField: {}, // object props are accessible via .get(key)
+c.bind(data)
+console.log(data.sometextField)
+// read single multipart/form-data field
+const title = c.formValue("title")
+// read single multipart/form-data file
+const doc = c.formFile("document")
+##### Writing response body
+// send response with json body
+c.json(200, {"name": "John"})
+// send response with string body
+// send response with html body
+// (check also the "Rendering templates" section)
+c.html(200, "&lt;h1>Hello!&lt;/h1>")
+// redirect
+// send response with no body
+c.noContent(204)
+### Middlewares
+Middlewares could be used to apply a shared behavior or to intercept and modify route requests.
+Middlewares can be registered both to a single route (by passing them after the handler) and globally usually
+by using routerUse(someMiddlereFunc).
+// attach a middleware globally to all routes
+routerUse(someMiddlereFunc)
+// attach multiple middlewares to a single route
+// each route will execute their own middlewares + the global ones
+routerAdd("GET", "/hello", (c) => {
+return c.string(200, "Hello world!")
+}, $apis.activityLogger($app), $apis.requireAdminAuth())
+##### Builtin middlewares
+// logs the request in the Admin UI > Logs
+$apis.activityLogger($app)
+// requires the request client to be unauthenticated, aka. guest
+$apis.requireGuestOnly()
+// requires the request client to be authenticated as an auth record
+$apis.requireRecordAuth(optCollectionNames...)
+// require the request client to be authenticated as admin
+$apis.requireAdminAuth()
+// require the request client to be authenticated as admin OR auth record
+$apis.requireAdminOrRecordAuth(optCollectionNames...)
+// require the request client to be authenticated as admin OR auth record
+// that matches the ownerIdParam path parameter
+$apis.requireAdminOrOwnerAuth(ownerIdParam = "id")
+// compresses HTTP response using gzip
+$apis.gzip()
+// sets the maximum allowed size (in bytes) for a request body
+$apis.bodyLimit(bytes)
+##### Custom middlewares
+return (c) => {
+// eg. inspect some header value before processing the request
+const header = c.request().header.get("Some-Header")
+if (!header) {
+// throw or return an error
+throw new BadRequestError("Invalid request")
+routerUse(myCustomMiddleware)
+### Error response
+PocketBase has a global error handler and every returned or thrown Error from a route or
+middleware will be safely converted by default to a generic HTTP 400 error to avoid accidentally leaking
+sensitive information (the original error will be visible only in the Admin UI &gt; Logs or when in
+--dev mode).
+To make it easier returning formatted json error responses, PocketBase provides
+ApiError constructor that can be instantiated directly or using the builtin factories.
+ApiError.data will be returned in the response only if it is a map of
+ValidationError items.
+// construct ApiError with custom status code and validation data error
+throw new ApiError(500, "something went wrong", {
+"title": new ValidationError("invalid_title", "Invalid or missing title"),
+// if message is empty string, a default one will be set
+throw new BadRequestError(optMessage, optData)   // 400 ApiError
+throw new UnauthorizedError(optMessage, optData) // 401 ApiError
+throw new ForbiddenError(optMessage, optData)    // 403 ApiError
+throw new NotFoundError(optMessage, optData)     // 404 ApiError
+### Helpers
+The global $apis namespace expose several helpers you can use as part of your route hooks.
+##### Auth response
+$apis.recordAuthResponse() writes standardised json record auth response (aka. token + record
+data) into the specified request context. Could be used as a return result from a custom auth route.
+routerAdd("GET", "/phone-login", (c) => {
+const data = new DynamicModel({
+phone:    "",
+password: "",
+c.bind(data)
+const record = $app.dao().findFirstRecordByData("users", "phone", data.phone)
+if (!record.validatePassword(data.password)) {
+throw new BadRequestError("invalid credentials")
+return $apis.recordAuthResponse($app, c, record)
+}, $apis.activityLogger($app))
+##### Enrich record(s)
+$apis.enrichRecord() and $apis.enrichRecords() helpers parses the request context
+and enrich the provided record(s) by:
+-expands relations (if defaultExpands and/or ?expand query parameter is set)
+-ensures that the emails of the auth record and its expanded auth relations are visible only for the
+current logged admin, record owner or record with manage access
+routerAdd("GET", "/custom-article", (c) => {
+const records = $app.dao().findRecordsByFilter("article", "status = 'active'", '-created', 40)
+// enrich the records with the "categories" relation as default expand
+$apis.enrichRecords(c, $app.dao(), records, "categories")
+return c.json(200, records)
+}, $apis.activityLogger($app))
+##### Serving static files
+`routerAdd("GET", "/*", $apis.staticDirectoryHandler("/path/to/public", false))`
+### Sending request to custom routes using the SDKs
+The official PocketBase SDKs expose the internal send() method that could be used to send requests
+to your custom route(s).
+Dart
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+await pb.send("/old/hello", {
+// for all possible options check
+// https://developer.mozilla.org/en-US/docs/Web/API/fetch#options
+query: { "abc": 123 },
+import 'package:pocketbase/pocketbase.dart';
+final pb = PocketBase('http://127.0.0.1:8090');
+await pb.send("/old/hello", query: { "abc": 123 })
+--------------------------------------------------------------------------------
+

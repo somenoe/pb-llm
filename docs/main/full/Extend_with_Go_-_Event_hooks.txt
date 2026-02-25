@@ -1,0 +1,1932 @@
+POCKETBASE DOCUMENTATION
+==================================================
+
+Generated: 2026-02-25 12:41:03 | Sections: 1
+
+[1] Extend with Go - Event hooks
+URL: https://pocketbase.io/old/docs/go-event-hooks/
+Category: go-extensions
+API: GET /hello"
+
+Content:
+# Extend with Go - Event hooks
+`GET /hello"`
+The standard way to modify the default PocketBase behavior is through
+event hooks in your Go code.
+Each event hook has 3 main public methods:
+-PreAdd(handler)
+- prepend a new handler function to the specified event hook.
+Returning an error or hook.StopPropagation in the handler function stops the hook execution
+chain.
+-Add(handler)
+- append a new handler function to the specified event hook.
+Returning an error or hook.StopPropagation in the handler function stops the hook execution
+chain.
+-Trigger(data)
+- triggers the event hook, aka. executes its handlers in the order they were added.
+This method rarely has to be called manually by users.
+To remove an already registered hook handler, you can use the handler id that is returned with each
+Pre/Add registration and pass it to Remove(id) or remove all handlers with
+RemoveAll() (including system handlers).
+You can explore all available event hooks below:
+### App hooks
+OnBeforeBootstrap
+`OnBeforeBootstrap` hook is triggered before initializing the main
+application resources (eg. before db open and initial settings load).
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnBeforeBootstrap().Add(func(e *core.BootstrapEvent) error {
+log.Println(e.App)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAfterBootstrap
+`OnAfterBootstrap` hook is triggered after initializing the main
+application resources (eg. after db open and initial settings load).
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAfterBootstrap().Add(func(e *core.BootstrapEvent) error {
+log.Println(e.App)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnBeforeServe
+`OnBeforeServe` hook is triggered before serving the internal router
+(echo),
+allowing you to adjust its options and attach new routes or middlewares.
+package main
+import (
+"log"
+"net/http"
+"github.com/labstack/echo/v5"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/apis"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+// register new "GET /hello" route
+e.Router.GET("/old/hello", func(c echo.Context) error {
+return c.String(200, "Hello world!")
+}, apis.ActivityLogger(app), apis.RequireAdminOrUserAuth())
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnBeforeApiError
+`OnBeforeApiError` hook is triggered right before sending an error API
+response to the client, allowing you to further modify the error data
+or to return a completely different API response.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnBeforeApiError().Add(func(e *core.ApiErrorEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Error)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAfterApiError
+`OnAfterApiError` hook is triggered right after sending an error API
+response to the client.
+It could be used for example to log the final API error in external services.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAfterApiError().Add(func(e *core.ApiErrorEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Error)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnTerminate
+`OnTerminate` hook is triggered when the app is in the process
+of being terminated (eg. on `SIGTERM` signal).
+Note that the app could be terminated abruptly without awaiting the hook completion.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnTerminate().Add(func(e *core.TerminateEvent) error {
+log.Println("terminating...")
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### DB hooks
+OnModelBeforeCreate
+OnModelBeforeCreate hook is triggered before inserting a new
+model in the DB, allowing you to modify or validate the stored data.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every db model
+app.OnModelBeforeCreate().Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+// fires only for "users" and "members"
+app.OnModelBeforeCreate("users", "members").Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnModelAfterCreate
+OnModelAfterCreate hook is triggered after successfully
+inserting a new model in the DB.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every db model
+app.OnModelAfterCreate().Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+// fires only for "users" and "members"
+app.OnModelAfterCreate("users", "members").Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnModelBeforeUpdate
+OnModelBeforeUpdate hook is triggered before updating existing
+model in the DB, allowing you to modify or validate the stored data.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every db model
+app.OnModelBeforeUpdate().Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+// fires only for "users" and "members"
+app.OnModelBeforeUpdate("users", "members").Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnModelAfterUpdate
+OnModelAfterUpdate hook is triggered after successfully updating
+existing model in the DB.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every db model
+app.OnModelAfterUpdate().Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+// fires only for "users" and "members"
+app.OnModelAfterUpdate("users", "members").Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnModelBeforeDelete
+OnModelBeforeDelete hook is triggered before deleting an
+existing model from the DB.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every db model
+app.OnModelBeforeDelete().Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+// fires only for "users" and "members"
+app.OnModelBeforeDelete("users", "members").Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnModelAfterDelete
+OnModelAfterDelete hook is triggered after successfully
+deleting an existing model from the DB.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every db model
+app.OnModelAfterDelete().Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+// fires only for "users" and "members"
+app.OnModelAfterDelete("users", "members").Add(func(e *core.ModelEvent) error {
+log.Println(e.Model.TableName())
+log.Println(e.Model.GetId())
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### Mailer hooks
+OnMailerBeforeAdminResetPasswordSend
+`OnMailerBeforeAdminResetPasswordSend` hook is triggered right
+before sending a password reset email to an admin, allowing you
+to inspect and customize the email message that is being sent.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnMailerBeforeAdminResetPasswordSend().Add(func(e *core.MailerAdminEvent) error {
+log.Println(e.MailClient)
+log.Println(e.Message)
+log.Println(e.Admin)
+log.Println(e.Meta)
+// change the mail subject
+e.Message.Subject = "new subject"
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnMailerAfterAdminResetPasswordSend
+`OnMailerAfterAdminResetPasswordSend` hook is triggered after
+admin password reset email was successfully sent.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnMailerAfterAdminResetPasswordSend().Add(func(e *core.MailerAdminEvent) error {
+log.Println(e.MailClient)
+log.Println(e.Message)
+log.Println(e.Admin)
+log.Println(e.Meta)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnMailerBeforeRecordResetPasswordSend
+OnMailerBeforeRecordResetPasswordSend hook is triggered right
+before sending a password reset email to an auth record, allowing
+you to inspect and customize the email message that is being sent.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnMailerBeforeRecordResetPasswordSend().Add(func(e *core.MailerRecordEvent) error {
+log.Println(e.MailClient)
+log.Println(e.Message)
+log.Println(e.Record)
+log.Println(e.Meta)
+// change the mail subject
+e.Message.Subject = "new subject"
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnMailerAfterRecordResetPasswordSend
+OnMailerAfterRecordResetPasswordSend hook is triggered
+after an auth record password reset email was successfully sent.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"net/mail"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnMailerAfterRecordResetPasswordSend().Add(func(e *core.MailerRecordEvent) error {
+log.Println(e.MailClient)
+log.Println(e.Message)
+log.Println(e.Record)
+log.Println(e.Meta)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnMailerBeforeRecordVerificationSend
+OnMailerBeforeRecordVerificationSend hook is triggered right
+before sending a verification email to an auth record, allowing
+you to inspect and customize the email message that is being sent.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnMailerBeforeRecordVerificationSend().Add(func(e *core.MailerRecordEvent) error {
+log.Println(e.MailClient)
+log.Println(e.Message)
+log.Println(e.Record)
+log.Println(e.Meta)
+// change the mail subject
+e.Message.Subject = "new subject"
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnMailerAfterRecordVerificationSend
+OnMailerAfterRecordVerificationSend hook is triggered
+after a verification email was successfully sent to an auth record.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnMailerAfterRecordVerificationSend().Add(func(e *core.MailerRecordEvent) error {
+log.Println(e.MailClient)
+log.Println(e.Message)
+log.Println(e.Record)
+log.Println(e.Meta)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnMailerBeforeRecordChangeEmailSend
+OnMailerBeforeRecordChangeEmailSend hook is triggered right before
+sending a confirmation new address email to an auth record, allowing
+you to inspect and customize the email message that is being sent.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnMailerBeforeRecordChangeEmailSend().Add(func(e *core.MailerRecordEvent) error {
+log.Println(e.MailClient)
+log.Println(e.Message)
+log.Println(e.Record)
+log.Println(e.Meta)
+// change the mail subject
+e.Message.Subject = "new subject"
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnMailerAfterRecordChangeEmailSend
+OnMailerAfterRecordChangeEmailSend hook is triggered
+after a verification email was successfully sent to an auth record.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnMailerAfterRecordChangeEmailSend().Add(func(e *core.MailerRecordEvent) error {
+log.Println(e.MailClient)
+log.Println(e.Message)
+log.Println(e.Record)
+log.Println(e.Meta)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### Record CRUD API hooks
+OnRecordsListRequest
+OnRecordsListRequest hook is triggered on each API Records list request.
+Could be used to validate or modify the response before returning it to the client.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every collection
+app.OnRecordsListRequest().Add(func(e *core.RecordsListEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Result)
+return nil
+// fires only for "users" and "articles" collections
+app.OnRecordsListRequest("users", "articles").Add(func(e *core.RecordsListEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Result)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordViewRequest
+OnRecordViewRequest hook is triggered on each API Record view request.
+Could be used to validate or modify the response before returning it to the client.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every collection
+app.OnRecordViewRequest().Add(func(e *core.RecordViewEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "articles" collections
+app.OnRecordViewRequest("users", "articles").Add(func(e *core.RecordViewEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeCreateRequest
+OnRecordBeforeCreateRequest hook is triggered before each API Record
+create request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every collection
+app.OnRecordBeforeCreateRequest().Add(func(e *core.RecordCreateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.UploadedFiles)
+return nil
+// fires only for "users" and "articles" collections
+app.OnRecordBeforeCreateRequest("users", "articles").Add(func(e *core.RecordCreateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.UploadedFiles)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterCreateRequest
+OnRecordAfterCreateRequest hook is triggered after each
+successful API Record create request.
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every collection
+app.OnRecordAfterCreateRequest().Add(func(e *core.RecordCreateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.UploadedFiles)
+return nil
+// fires only for "users" and "articles" collections
+app.OnRecordAfterCreateRequest("users", "articles").Add(func(e *core.RecordCreateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.UploadedFiles)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeUpdateRequest
+OnRecordBeforeUpdateRequest hook is triggered before each API Record
+update request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every collection
+app.OnRecordBeforeUpdateRequest().Add(func(e *core.RecordUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.UploadedFiles)
+return nil
+// fires only for "users" and "articles" collections
+app.OnRecordBeforeUpdateRequest("users", "articles").Add(func(e *core.RecordUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.UploadedFiles)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterUpdateRequest
+OnRecordAfterUpdateRequest hook is triggered
+after each successful API Record update request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every collection
+app.OnRecordAfterUpdateRequest().Add(func(e *core.RecordUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.UploadedFiles)
+return nil
+// fires only for "users" and "articles" collections
+app.OnRecordAfterUpdateRequest("users", "articles").Add(func(e *core.RecordUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.UploadedFiles)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeDeleteRequest
+OnRecordBeforeDeleteRequest hook is triggered before each API Record
+delete request (after model load and before actual deletion).
+Could be used to additionally validate the request data or implement
+completely different delete behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every collection
+app.OnRecordBeforeDeleteRequest().Add(func(e *core.RecordDeleteEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "articles" collections
+app.OnRecordBeforeDeleteRequest("users", "articles").Add(func(e *core.RecordDeleteEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterDeleteRequest
+OnRecordAfterDeleteRequest hook is triggered
+after each successful API Record delete request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every collection
+app.OnRecordAfterDeleteRequest().Add(func(e *core.RecordDeleteEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "articles" collections
+app.OnRecordAfterDeleteRequest("users", "articles").Add(func(e *core.RecordDeleteEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### Record Auth API hooks
+OnRecordAuthRequest
+OnRecordAuthRequest hook is triggered on each successful API
+record authentication request (sign-in, token refresh, etc.).
+Could be used to additionally validate or modify the authenticated
+record data and token.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAuthRequest().Add(func(e *core.RecordAuthEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.Token)
+log.Println(e.Meta)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAuthRequest("users", "managers").Add(func(e *core.RecordAuthEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.Token)
+log.Println(e.Meta)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeAuthWithPasswordRequest
+OnRecordBeforeAuthWithPasswordRequest hook is triggered before each Record
+auth with password API request (after request data load and before password validation).
+Could be used to implement for example a custom password validation
+or to locate a different Record model (by reassigning RecordAuthWithPasswordEvent.Record).
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordBeforeAuthWithPasswordRequest().Add(func(e *core.RecordAuthWithPasswordEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record) // could be nil
+log.Println(e.Identity)
+log.Println(e.Password)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordBeforeAuthWithPasswordRequest("users", "managers").Add(func(e *core.RecordAuthWithPasswordEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record) // could be nil
+log.Println(e.Identity)
+log.Println(e.Password)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterAuthWithPasswordRequest
+OnRecordAfterAuthWithPasswordRequest hook is triggered after each
+successful Record auth with password API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAfterAuthWithPasswordRequest().Add(func(e *core.RecordAuthWithPasswordEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.Identity)
+log.Println(e.Password)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAfterAuthWithPasswordRequest("users", "managers").Add(func(e *core.RecordAuthWithPasswordEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.Identity)
+log.Println(e.Password)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeAuthWithOAuth2Request
+OnRecordBeforeAuthWithOAuth2Request hook is triggered before each Record
+OAuth2 sign-in/sign-up API request (after token exchange and before external provider linking).
+If the RecordAuthWithOAuth2Event.Record is not set,
+then the OAuth2 request will try to create a new auth Record.
+To assign or link a different existing record model you can
+change the RecordAuthWithOAuth2Event.Record field.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordBeforeAuthWithOAuth2Request().Add(func(e *core.RecordAuthWithOAuth2Event) error {
+log.Println(e.HttpContext)
+log.Println(e.ProviderName)
+log.Println(e.ProviderClient)
+log.Println(e.Record) // could be nil
+log.Println(e.OAuth2User)
+log.Println(e.IsNewRecord)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordBeforeAuthWithOAuth2Request("users", "managers").Add(func(e *core.RecordAuthWithOAuth2Event) error {
+log.Println(e.HttpContext)
+log.Println(e.ProviderName)
+log.Println(e.ProviderClient)
+log.Println(e.Record) // could be nil
+log.Println(e.OAuth2User)
+log.Println(e.IsNewRecord)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterAuthWithOAuth2Request
+OnRecordAfterAuthWithOAuth2Request hook is triggered
+after each successful Record OAuth2 API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAfterAuthWithOAuth2Request().Add(func(e *core.RecordAuthWithOAuth2Event) error {
+log.Println(e.HttpContext)
+log.Println(e.ProviderName)
+log.Println(e.ProviderClient)
+log.Println(e.Record)
+log.Println(e.OAuth2User)
+log.Println(e.IsNewRecord)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAfterAuthWithOAuth2Request("users", "managers").Add(func(e *core.RecordAuthWithOAuth2Event) error {
+log.Println(e.HttpContext)
+log.Println(e.ProviderName)
+log.Println(e.ProviderClient)
+log.Println(e.Record)
+log.Println(e.OAuth2User)
+log.Println(e.IsNewRecord)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeAuthRefreshRequest
+OnRecordBeforeAuthRefreshRequest hook is triggered before each Record
+auth refresh API request (right before generating a new auth token).
+Could be used to additionally validate the request data or implement
+completely different auth refresh behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordBeforeAuthRefreshRequest().Add(func(e *core.RecordAuthRefreshEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordBeforeAuthRefreshRequest("users", "managers").Add(func(e *core.RecordAuthRefreshEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterAuthRefreshRequest
+OnRecordAfterAuthRefreshRequest hook is triggered after each
+successful auth refresh API request (right after generating a new auth token).
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAfterAuthRefreshRequest().Add(func(e *core.RecordAuthRefreshEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAfterAuthRefreshRequest("users", "managers").Add(func(e *core.RecordAuthRefreshEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordListExternalAuthsRequest
+OnRecordListExternalAuthsRequest hook is triggered on each API record external auths list request.
+Could be used to validate or modify the response before returning it to the client.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordListExternalAuthsRequest().Add(func(e *core.RecordListExternalAuthsEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.ExternalAuths)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordListExternalAuthsRequest("users", "managers").Add(func(e *core.RecordListExternalAuthsEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.ExternalAuths)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeUnlinkExternalAuthRequest
+OnRecordBeforeUnlinkExternalAuthRequest hook is triggered before each API record
+external auth unlink request (after models load and before the actual relation deletion).
+Could be used to additionally validate the request data or implement
+completely different delete behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordBeforeUnlinkExternalAuthRequest().Add(func(e *core.RecordUnlinkExternalAuthEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.ExternalAuth)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordBeforeUnlinkExternalAuthRequest("users", "managers").Add(func(e *core.RecordUnlinkExternalAuthEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.ExternalAuth)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterUnlinkExternalAuthRequest
+OnRecordAfterUnlinkExternalAuthRequest hook is triggered
+after each successful API record external auth unlink request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAfterUnlinkExternalAuthRequest().Add(func(e *core.RecordUnlinkExternalAuthEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.ExternalAuth)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAfterUnlinkExternalAuthRequest("users", "managers").Add(func(e *core.RecordUnlinkExternalAuthEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.ExternalAuth)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeRequestPasswordResetRequest
+OnRecordBeforeRequestPasswordResetRequest hook is triggered before each Record
+request password reset API request (after request data load and before sending the reset email).
+Could be used to additionally validate the request data or implement
+completely different password reset behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordBeforeRequestPasswordResetRequest().Add(func(e *core.RecordRequestPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordBeforeRequestPasswordResetRequest("users", "managers").Add(func(e *core.RecordRequestPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterRequestPasswordResetRequest
+OnRecordAfterRequestPasswordResetRequest hook is triggered
+after each successful request password reset API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAfterRequestPasswordResetRequest().Add(func(e *core.RecordRequestPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAfterRequestPasswordResetRequest("users", "managers").Add(func(e *core.RecordRequestPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeConfirmPasswordResetRequest
+OnRecordBeforeConfirmPasswordResetRequest hook is triggered before each Record
+confirm password reset API request (after request data load and before persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordBeforeConfirmPasswordResetRequest().Add(func(e *core.RecordConfirmPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordBeforeConfirmPasswordResetRequest("users", "managers").Add(func(e *core.RecordConfirmPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterConfirmPasswordResetRequest
+OnRecordAfterConfirmPasswordResetRequest hook is triggered
+after each successful confirm password reset API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAfterConfirmPasswordResetRequest().Add(func(e *core.RecordConfirmPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAfterConfirmPasswordResetRequest("users", "managers").Add(func(e *core.RecordConfirmPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeRequestVerificationRequest
+OnRecordBeforeRequestVerificationRequest hook is triggered before each Record
+request verification API request (after request data load and before sending the verification email).
+Could be used to additionally validate the loaded request data or implement
+completely different verification behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordBeforeRequestVerificationRequest().Add(func(e *core.RecordRequestVerificationEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordBeforeRequestVerificationRequest("users", "managers").Add(func(e *core.RecordRequestVerificationEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterRequestVerificationRequest
+OnRecordAfterRequestVerificationRequest  hook is triggered
+after each successful request verification API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAfterRequestVerificationRequest().Add(func(e *core.RecordRequestVerificationEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAfterRequestVerificationRequest("users", "managers").Add(func(e *core.RecordRequestVerificationEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeConfirmVerificationRequest
+OnRecordBeforeConfirmVerificationRequest hook is triggered before each Record
+confirm verification API request (after request data load and before persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordBeforeConfirmVerificationRequest().Add(func(e *core.RecordConfirmVerificationEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordBeforeConfirmVerificationRequest("users", "managers").Add(func(e *core.RecordConfirmVerificationEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterConfirmVerificationRequest
+OnRecordAfterConfirmVerificationRequest hook is triggered after each
+successful confirm verification API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAfterConfirmVerificationRequest().Add(func(e *core.RecordConfirmVerificationEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAfterConfirmVerificationRequest("users", "managers").Add(func(e *core.RecordConfirmVerificationEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordBeforeRequestEmailChangeRequest
+OnRecordBeforeRequestEmailChangeRequest hook is triggered before each Record request email change API request
+(after request data load and before sending the email link to confirm the change).
+Could be used to additionally validate the request data or implement
+completely different request email change behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordBeforeRequestEmailChangeRequest().Add(func(e *core.RecordRequestEmailChangeEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordBeforeRequestEmailChangeRequest("users", "managers").Add(func(e *core.RecordRequestEmailChangeEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRecordAfterRequestEmailChangeRequest
+OnRecordAfterRequestEmailChangeRequest hook is triggered
+after each successful request email change API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth collection
+app.OnRecordAfterRequestEmailChangeRequest().Add(func(e *core.RecordRequestEmailChangeEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+// fires only for "users" and "managers" auth collections
+app.OnRecordAfterRequestEmailChangeRequest("users", "managers").Add(func(e *core.RecordRequestEmailChangeEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Record)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### Realtime API hooks
+OnRealtimeConnectRequest
+`OnRealtimeConnectRequest` hook is triggered right before establishing
+the SSE client connection.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnRealtimeConnectRequest().Add(func(e *core.RealtimeConnectEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Client.Id())
+log.Println(e.IdleTimeout)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRealtimeDisconnectRequest
+`OnRealtimeDisconnectRequest` hook is triggered on disconnected/interrupted
+SSE client connection.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnRealtimeDisconnectRequest().Add(func(e *core.RealtimeDisconnectEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Client.Id())
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRealtimeBeforeMessageSend
+OnRealtimeBeforeMessageSend hook is triggered right before sending
+an SSE message to a client.
+Returning hook.StopPropagation will prevent sending the message.
+Returning any other error will close the realtime connection.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnRealtimeBeforeMessageSend().Add(func(e *core.RealtimeMessageEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Client.Id())
+log.Println(e.Message)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRealtimeAfterMessageSend
+`OnRealtimeAfterMessageSend` hook is triggered right after sending
+an SSE message to a client.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnRealtimeAfterMessageSend().Add(func(e *core.RealtimeMessageEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Client.Id())
+log.Println(e.Message)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRealtimeBeforeSubscribeRequest
+`OnRealtimeBeforeSubscribeRequest` hook is triggered before changing
+the client subscriptions, allowing you to further validate and
+modify the submitted change.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnRealtimeBeforeSubscribeRequest().Add(func(e *core.RealtimeSubscribeEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Client.Id())
+log.Println(e.Subscriptions)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnRealtimeAfterSubscribeRequest
+`OnRealtimeAfterSubscribeRequest` hook is triggered after the client
+subscriptions were successfully changed.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnRealtimeAfterSubscribeRequest().Add(func(e *core.RealtimeSubscribeEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Client.Id())
+log.Println(e.Subscriptions)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### File API hooks
+Could be used to validate or modify the file response before returning it to the client.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+log.Println(e.HttpContext)
+log.Println(e.Record)
+log.Println(e.FileField)
+log.Println(e.ServedPath)
+log.Println(e.ServedName)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnFileBeforeTokenRequest
+OnFileBeforeTokenRequest hook is triggered before each file
+token API request.
+If no token or model was submitted, e.Model and e.Token will be empty,
+allowing you to implement your own custom model file auth implementation.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth model
+app.OnFileBeforeTokenRequest().Add(func(e *core.FileTokenEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Token)
+return nil
+// fires only for "users"
+app.OnFileBeforeTokenRequest("users").Add(func(e *core.FileTokenEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Token)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnFileAfterTokenRequest
+OnFileAfterTokenRequest hook is triggered after each
+successful file token API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+// fires for every auth model
+app.OnFileAfterTokenRequest().Add(func(e *core.FileTokenEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Token)
+return nil
+// fires only for "users"
+app.OnFileAfterTokenRequest("users").Add(func(e *core.FileTokenEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Token)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### Collection API hooks
+OnCollectionsListRequest
+`OnCollectionsListRequest` hook is triggered on each API Collections list request.
+Could be used to validate or modify the response before returning it to the client.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionsListRequest().Add(func(e *core.CollectionsListEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collections)
+log.Println(e.Result)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnCollectionViewRequest
+`OnCollectionViewRequest` hook is triggered on each API Collection view request.
+Could be used to validate or modify the response before returning it to the client.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionViewRequest().Add(func(e *core.CollectionViewEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collection)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnCollectionBeforeCreateRequest
+`OnCollectionBeforeCreateRequest` hook is triggered before each API Collection
+create request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionBeforeCreateRequest().Add(func(e *core.CollectionCreateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collection)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnCollectionAfterCreateRequest
+`OnCollectionAfterCreateRequest` hook is triggered after each
+successful API Collection create request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionAfterCreateRequest().Add(func(e *core.CollectionCreateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collection)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnCollectionBeforeUpdateRequest
+`OnCollectionBeforeUpdateRequest` hook is triggered before each API Collection
+update request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionBeforeUpdateRequest().Add(func(e *core.CollectionUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collection)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnCollectionAfterUpdateRequest
+`OnCollectionAfterUpdateRequest` hook is triggered after each
+successful API Collection update request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionAfterUpdateRequest().Add(func(e *core.CollectionUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collection)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnCollectionBeforeDeleteRequest
+`OnCollectionBeforeDeleteRequest` hook is triggered before each API
+Collection delete request (after model load and before actual deletion).
+Could be used to additionally validate the request data or implement
+completely different delete behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionBeforeDeleteRequest().Add(func(e *core.CollectionDeleteEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collection)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnCollectionAfterDeleteRequest
+`OnCollectionAfterDeleteRequest` hook is triggered after each
+successful API Collection delete request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionAfterDeleteRequest().Add(func(e *core.CollectionDeleteEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collection)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnCollectionsBeforeImportRequest
+`OnCollectionsBeforeImportRequest` hook is triggered before each API
+collections import request (after request data load and before the actual import).
+Could be used to additionally validate the imported collections or
+to implement completely different import behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionsBeforeImportRequest().Add(func(e *core.CollectionsImportEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collections)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnCollectionsAfterImportRequest
+`OnCollectionsAfterImportRequest` hook is triggered after each
+successful API collections import request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnCollectionsAfterImportRequest().Add(func(e *core.CollectionsImportEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Collections)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### Settings API hooks
+OnSettingsListRequest
+`OnSettingsListRequest` hook is triggered on each successful
+API Settings list request.
+Could be used to validate or modify the response before
+returning it to the client.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnSettingsListRequest().Add(func(e *core.SettingsListEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.RedactedSettings)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnSettingsBeforeUpdateRequest
+`OnSettingsBeforeUpdateRequest` hook is triggered on each successful
+API Settings list request.
+Could be used to validate or modify the response before
+returning it to the client.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnSettingsBeforeUpdateRequest().Add(func(e *core.SettingsUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.OldSettings)
+log.Println(e.NewSettings)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnSettingsAfterUpdateRequest
+`OnSettingsAfterUpdateRequest` hook is triggered after each
+successful API Settings update request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnSettingsAfterUpdateRequest().Add(func(e *core.SettingsUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.OldSettings)
+log.Println(e.NewSettings)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### Admin CRUD API hooks
+OnAdminsListRequest
+`OnAdminsListRequest` hook is triggered on each API Admins list request.
+Could be used to validate or modify the response before returning it to the client.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminsListRequest().Add(func(e *core.AdminsListEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admins)
+log.Println(e.Result)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminViewRequest
+`OnAdminViewRequest` hook is triggered on each API Admin view request.
+Could be used to validate or modify the response before returning it to the client.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminViewRequest().Add(func(e *core.AdminViewEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminBeforeCreateRequest
+`OnAdminBeforeCreateRequest` hook is triggered before each API
+Admin create request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminBeforeCreateRequest().Add(func(e *core.AdminCreateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminAfterCreateRequest
+`OnAdminAfterCreateRequest` hook is triggered after each
+successful API Admin create request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminAfterCreateRequest().Add(func(e *core.AdminCreateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminBeforeUpdateRequest
+`OnAdminBeforeUpdateRequest` hook is triggered before each API
+Admin update request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminBeforeUpdateRequest().Add(func(e *core.AdminUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminAfterUpdateRequest
+`OnAdminAfterUpdateRequest` hook is triggered after each
+successful API Admin update request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminAfterUpdateRequest().Add(func(e *core.AdminUpdateEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminBeforeDeleteRequest
+`OnAdminBeforeDeleteRequest` hook is triggered before each API
+Admin delete request (after model load and before actual deletion).
+Could be used to additionally validate the request data or implement
+completely different delete behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminBeforeDeleteRequest().Add(func(e *core.AdminDeleteEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminAfterDeleteRequest
+`OnAdminAfterDeleteRequest` hook is triggered after each
+successful API Admin delete request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminAfterDeleteRequest().Add(func(e *core.AdminDeleteEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+### Admin Auth API hooks
+OnAdminAuthRequest
+`OnAdminAuthRequest` hook is triggered on each successful API Admin
+authentication request (sign-in, token refresh, etc.).
+Could be used to additionally validate or modify the
+authenticated admin data and token.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminAuthRequest().Add(func(e *core.AdminAuthEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+log.Println(e.Token)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminBeforeAuthWithPasswordRequest
+`OnAdminBeforeAuthWithPasswordRequest` hook is triggered before each Admin
+auth with password API request (after request data load and before password validation).
+Could be used to implement for example a custom password validation
+or to locate a different Admin identity (by assigning `AdminAuthWithPasswordEvent.Admin`).
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminBeforeAuthWithPasswordRequest().Add(func(e *core.AdminAuthWithPasswordEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+log.Println(e.Identity)
+log.Println(e.Password)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminAfterAuthWithPasswordRequest
+`OnAdminAfterAuthWithPasswordRequest` hook is triggered after each
+successful Admin auth with password API request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminAfterAuthWithPasswordRequest().Add(func(e *core.AdminAuthWithPasswordEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+log.Println(e.Identity)
+log.Println(e.Password)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminBeforeAuthRefreshRequest
+`OnAdminBeforeAuthRefreshRequest` hook is triggered before each Admin
+auth refresh API request (right before generating a new auth token).
+Could be used to additionally validate the request data or implement
+completely different auth refresh behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminBeforeAuthRefreshRequest().Add(func(e *core.AdminAuthRefreshEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminAfterAuthRefreshRequest
+`OnAdminAfterAuthRefreshRequest` hook is triggered after each
+successful auth refresh API request (right after generating a new auth token).
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminAfterAuthRefreshRequest().Add(func(e *core.AdminAuthRefreshEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminBeforeRequestPasswordResetRequest
+`OnAdminBeforeRequestPasswordResetRequest` hook is triggered before each Admin
+request password reset API request (after request data load and before sending the reset email).
+Could be used to additionally validate the request data or implement
+completely different password reset behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminBeforeRequestPasswordResetRequest().Add(func(e *core.AdminRequestPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminAfterRequestPasswordResetRequest
+`OnAdminAfterRequestPasswordResetRequest` hook is triggered after each
+successful request password reset API request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminAfterRequestPasswordResetRequest().Add(func(e *core.AdminRequestPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminBeforeConfirmPasswordResetRequest
+`OnAdminBeforeConfirmPasswordResetRequest` hook is triggered before each Admin
+confirm password reset API request (after request data load and before persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminBeforeConfirmPasswordResetRequest().Add(func(e *core.AdminConfirmPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+OnAdminAfterConfirmPasswordResetRequest
+`OnAdminAfterConfirmPasswordResetRequest` hook is triggered after each
+successful confirm password reset API request.
+package main
+import (
+"log"
+"github.com/pocketbase/pocketbase"
+"github.com/pocketbase/pocketbase/core"
+func main() {
+app := pocketbase.New()
+app.OnAdminAfterConfirmPasswordResetRequest().Add(func(e *core.AdminConfirmPasswordResetEvent) error {
+log.Println(e.HttpContext)
+log.Println(e.Admin)
+return nil
+if err := app.Start(); err != nil {
+log.Fatal(err)
+--------------------------------------------------------------------------------
+

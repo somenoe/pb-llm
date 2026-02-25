@@ -1,0 +1,1023 @@
+# POCKETBASE DOCS|2026-02-25|1 sections
+
+## 1.Extend with JavaScript - Event hooks
+# Extend with JavaScript - Event hooks
+You can extend the default PocketBase behavior with custom server-side code using the exposed JavaScript
+app level hooks.
+Throwing an error or returning false inside a hook handler function stops the hook execution chain.
+### App hooks
+onBeforeBootstrap
+`onBeforeBootstrap` hook is triggered before initializing the main
+application resources (eg. before db open and initial settings load).
+onBeforeBootstrap((e) => {
+console.log(e.app)
+onAfterBootstrap
+`onAfterBootstrap` hook is triggered after initializing the main
+application resources (eg. after db open and initial settings load).
+onAfterBootstrap((e) => {
+console.log(e.app)
+onBeforeApiError
+`onBeforeApiError` hook is triggered right before sending an error API
+response to the client, allowing you to further modify the error data
+or to return a completely different API response.
+onBeforeApiError((e) => {
+console.log(e.httpContext)
+console.log(e.error)
+onAfterApiError
+`onAfterApiError` hook is triggered right after sending an error API
+response to the client.
+It could be used for example to log the final API error in external services.
+onAfterApiError((e) => {
+console.log(e.httpContext)
+console.log(e.error)
+onTerminate
+`onTerminate` hook is triggered when the app is in the process
+of being terminated (eg. on `SIGTERM` signal).
+Note that the app could be terminated abruptly without awaiting the hook completion.
+onTerminate((e) => {
+console.log("terminating...")
+### DB hooks
+onModelBeforeCreate
+onModelBeforeCreate hook is triggered before inserting a new
+model in the DB, allowing you to modify or validate the stored data.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+// fires for every db model
+onModelBeforeCreate((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+// fires only for "users" and "members"
+onModelBeforeCreate((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+}, "users", "members")
+onModelAfterCreate
+onModelAfterCreate hook is triggered after successfully
+inserting a new model in the DB.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+// fires for every db model
+onModelAfterCreate((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+// fires only for "users" and "members"
+onModelAfterCreate((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+}, "users", "members")
+onModelBeforeUpdate
+onModelBeforeUpdate hook is triggered before updating existing
+model in the DB, allowing you to modify or validate the stored data.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+// fires for every db model
+onModelBeforeUpdate((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+// fires only for "users" and "members"
+onModelBeforeUpdate((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+}, "users", "members")
+onModelAfterUpdate
+onModelAfterUpdate hook is triggered after successfully updating
+existing model in the DB.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+// fires for every db model
+onModelAfterUpdate((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+// fires only for "users" and "members"
+onModelAfterUpdate((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+}, "users", "members")
+onModelBeforeDelete
+onModelBeforeDelete hook is triggered before deleting an
+existing model from the DB.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+// fires for every db model
+onModelBeforeDelete((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+// fires only for "users" and "members"
+onModelBeforeDelete((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+}, "users", "members")
+onModelAfterDelete
+onModelAfterDelete hook is triggered after successfully
+deleting an existing model from the DB.
+If the optional "tags" list (table names and/or the Collection id for Record models)
+is specified, then all event handlers registered via the created hook
+will be triggered and called only if their event data origin matches the tags.
+// fires for every db model
+onModelAfterDelete((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+// fires only for "users" and "members"
+onModelAfterDelete((e) => {
+console.log(e.model.tableName())
+console.log(e.model.id)
+}, "users", "members")
+### Mailer hooks
+onMailerBeforeAdminResetPasswordSend
+`onMailerBeforeAdminResetPasswordSend` hook is triggered right
+before sending a password reset email to an admin, allowing you
+to inspect and customize the email message that is being sent.
+onMailerBeforeAdminResetPasswordSend((e) => {
+console.log(e.mailClient)
+console.log(e.message)
+console.log(e.admin)
+console.log(e.meta)
+// change the mail subject
+e.message.subject = "new subject"
+onMailerAfterAdminResetPasswordSend
+`onMailerAfterAdminResetPasswordSend` hook is triggered after
+admin password reset email was successfully sent.
+onMailerAfterAdminResetPasswordSend((e) => {
+console.log(e.mailClient)
+console.log(e.message)
+console.log(e.admin)
+console.log(e.meta)
+onMailerBeforeRecordResetPasswordSend
+onMailerBeforeRecordResetPasswordSend hook is triggered right
+before sending a password reset email to an auth record, allowing
+you to inspect and customize the email message that is being sent.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+onMailerBeforeRecordResetPasswordSend((e) => {
+console.log(e.mailClient)
+console.log(e.message)
+console.log(e.record)
+console.log(e.meta)
+// change the mail subject
+e.message.subject = "new subject"
+onMailerAfterRecordResetPasswordSend
+onMailerAfterRecordResetPasswordSend hook is triggered
+after an auth record password reset email was successfully sent.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+onMailerAfterRecordResetPasswordSend((e) => {
+console.log(e.mailClient)
+console.log(e.message)
+console.log(e.record)
+console.log(e.meta)
+onMailerBeforeRecordVerificationSend
+onMailerBeforeRecordVerificationSend hook is triggered right
+before sending a verification email to an auth record, allowing
+you to inspect and customize the email message that is being sent.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+onMailerBeforeRecordVerificationSend((e) => {
+console.log(e.mailClient)
+console.log(e.message)
+console.log(e.record)
+console.log(e.meta)
+// change the mail subject
+e.message.subject = "new subject"
+onMailerAfterRecordVerificationSend
+onMailerAfterRecordVerificationSend hook is triggered
+after a verification email was successfully sent to an auth record.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+onMailerAfterRecordVerificationSend((e) => {
+console.log(e.mailClient)
+console.log(e.message)
+console.log(e.record)
+console.log(e.meta)
+onMailerBeforeRecordChangeEmailSend
+onMailerBeforeRecordChangeEmailSend hook is triggered right before
+sending a confirmation new address email to an auth record, allowing
+you to inspect and customize the email message that is being sent.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+onMailerBeforeRecordChangeEmailSend((e) => {
+console.log(e.mailClient)
+console.log(e.message)
+console.log(e.record)
+console.log(e.meta)
+// change the mail subject
+e.message.subject = "new subject"
+onMailerAfterRecordChangeEmailSend
+onMailerAfterRecordChangeEmailSend hook is triggered
+after a verification email was successfully sent to an auth record.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+onMailerAfterRecordChangeEmailSend((e) => {
+console.log(e.mailClient)
+console.log(e.message)
+console.log(e.record)
+console.log(e.meta)
+### Record CRUD API hooks
+onRecordsListRequest
+onRecordsListRequest hook is triggered on each API Records list request.
+Could be used to validate or modify the response before returning it to the client.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every collection
+onRecordsListRequest((e) => {
+console.log(e.httpContext)
+console.log(e.result)
+// fires only for "users" and "articles" collections
+onRecordsListRequest((e) => {
+console.log(e.httpContext)
+console.log(e.result)
+}, "users", "articles")
+onRecordViewRequest
+onRecordViewRequest hook is triggered on each API Record view request.
+Could be used to validate or modify the response before returning it to the client.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every collection
+onRecordViewRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "articles" collections
+onRecordViewRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "articles")
+onRecordBeforeCreateRequest
+onRecordBeforeCreateRequest hook is triggered before each API Record
+create request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every collection
+onRecordBeforeCreateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.uploadedFiles)
+// fires only for "users" and "articles" collections
+onRecordBeforeCreateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.uploadedFiles)
+}, "users", "articles")
+onRecordAfterCreateRequest
+onRecordAfterCreateRequest hook is triggered after each
+successful API Record create request.
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every collection
+onRecordAfterCreateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.uploadedFiles)
+// fires only for "users" and "articles" collections
+onRecordAfterCreateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.uploadedFiles)
+}, "users", "articles")
+onRecordBeforeUpdateRequest
+onRecordBeforeUpdateRequest hook is triggered before each API Record
+update request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every collection
+onRecordBeforeUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.uploadedFiles)
+// fires only for "users" and "articles" collections
+onRecordBeforeUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.uploadedFiles)
+}, "users", "articles")
+onRecordAfterUpdateRequest
+onRecordAfterUpdateRequest hook is triggered
+after each successful API Record update request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every collection
+onRecordAfterUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.uploadedFiles)
+// fires only for "users" and "articles" collections
+onRecordAfterUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.uploadedFiles)
+}, "users", "articles")
+onRecordBeforeDeleteRequest
+onRecordBeforeDeleteRequest hook is triggered before each API Record
+delete request (after model load and before actual deletion).
+Could be used to additionally validate the request data or implement
+completely different delete behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every collection
+onRecordBeforeDeleteRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "articles" collections
+onRecordBeforeDeleteRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "articles")
+onRecordAfterDeleteRequest
+onRecordAfterDeleteRequest hook is triggered
+after each successful API Record delete request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every collection
+onRecordAfterDeleteRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "articles" collections
+onRecordAfterDeleteRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "articles")
+### Record Auth API hooks
+onRecordAuthRequest
+onRecordAuthRequest hook is triggered on each successful API
+record authentication request (sign-in, token refresh, etc.).
+Could be used to additionally validate or modify the authenticated
+record data and token.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAuthRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.token)
+console.log(e.meta)
+// fires only for "users" and "managers" auth collections
+onRecordAuthRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.token)
+console.log(e.meta)
+}, "users", "managers")
+onRecordBeforeAuthWithPasswordRequest
+onRecordBeforeAuthWithPasswordRequest hook is triggered before each Record
+auth with password API request (after request data load and before password validation).
+Could be used to implement for example a custom password validation
+or to locate a different Record model (by reassigning RecordAuthWithPasswordEvent.Record).
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordBeforeAuthWithPasswordRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record) // could be null
+console.log(e.identity)
+console.log(e.password)
+// fires only for "users" and "managers" auth collections
+onRecordBeforeAuthWithPasswordRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record) // could be null
+console.log(e.identity)
+console.log(e.password)
+}, "users", "managers")
+onRecordAfterAuthWithPasswordRequest
+onRecordAfterAuthWithPasswordRequest hook is triggered after each
+successful Record auth with password API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterAuthWithPasswordRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.identity)
+console.log(e.password)
+// fires only for "users" and "managers" auth collections
+onRecordAfterAuthWithPasswordRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.identity)
+console.log(e.password)
+}, "users", "managers")
+onRecordBeforeAuthWithOAuth2Request
+onRecordBeforeAuthWithOAuth2Request hook is triggered before each Record
+OAuth2 sign-in/sign-up API request (after token exchange and before external provider linking).
+If the RecordAuthWithOAuth2Event.Record is not set,
+then the OAuth2 request will try to create a new auth Record.
+To assign or link a different existing record model you can
+change the RecordAuthWithOAuth2Event.Record field.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordBeforeAuthWithOAuth2Request((e) => {
+console.log(e.httpContext)
+console.log(e.providerName)
+console.log(e.providerClient)
+console.log(e.record) // could be null
+console.log(e.oAuth2User)
+console.log(e.isNewRecord)
+// fires only for "users" and "managers" auth collections
+onRecordBeforeAuthWithOAuth2Request((e) => {
+console.log(e.httpContext)
+console.log(e.providerName)
+console.log(e.providerClient)
+console.log(e.record) // could be null
+console.log(e.oAuth2User)
+console.log(e.isNewRecord)
+}, "users", "managers")
+onRecordAfterAuthWithOAuth2Request
+onRecordAfterAuthWithOAuth2Request hook is triggered
+after each successful Record OAuth2 API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterAuthWithOAuth2Request((e) => {
+console.log(e.httpContext)
+console.log(e.providerName)
+console.log(e.providerClient)
+console.log(e.record)
+console.log(e.oAuth2User)
+console.log(e.isNewRecord)
+// fires only for "users" and "managers" auth collections
+onRecordAfterAuthWithOAuth2Request((e) => {
+console.log(e.httpContext)
+console.log(e.providerName)
+console.log(e.providerClient)
+console.log(e.record)
+console.log(e.oAuth2User)
+console.log(e.isNewRecord)
+}, "users", "managers")
+onRecordBeforeAuthRefreshRequest
+onRecordBeforeAuthRefreshRequest hook is triggered before each Record
+auth refresh API request (right before generating a new auth token).
+Could be used to additionally validate the request data or implement
+completely different auth refresh behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordBeforeAuthRefreshRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordBeforeAuthRefreshRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordAfterAuthRefreshRequest
+onRecordAfterAuthRefreshRequest hook is triggered after each
+successful auth refresh API request (right after generating a new auth token).
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterAuthRefreshRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordAfterAuthRefreshRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordListExternalAuthsRequest
+onRecordListExternalAuthsRequest hook is triggered on each API record external auths list request.
+Could be used to validate or modify the response before returning it to the client.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordListExternalAuthsRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.externalAuths)
+// fires only for "users" and "managers" auth collections
+onRecordListExternalAuthsRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.externalAuths)
+}, "users", "managers")
+onRecordBeforeUnlinkExternalAuthRequest
+onRecordBeforeUnlinkExternalAuthRequest hook is triggered before each API record
+external auth unlink request (after models load and before the actual relation deletion).
+Could be used to additionally validate the request data or implement
+completely different delete behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterUnlinkExternalAuthRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.externalAuth)
+// fires only for "users" and "managers" auth collections
+onRecordBeforeUnlinkExternalAuthRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.externalAuth)
+}, "users", "managers")
+onRecordAfterUnlinkExternalAuthRequest
+onRecordAfterUnlinkExternalAuthRequest hook is triggered
+after each successful API record external auth unlink request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterUnlinkExternalAuthRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.externalAuth)
+// fires only for "users" and "managers" auth collections
+onRecordAfterUnlinkExternalAuthRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.externalAuth)
+}, "users", "managers")
+onRecordBeforeRequestPasswordResetRequest
+onRecordBeforeRequestPasswordResetRequest hook is triggered before each Record
+request password reset API request (after request data load and before sending the reset email).
+Could be used to additionally validate the request data or implement
+completely different password reset behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordBeforeRequestPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordBeforeRequestPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordAfterRequestPasswordResetRequest
+onRecordAfterRequestPasswordResetRequest hook is triggered
+after each successful request password reset API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterRequestPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordAfterRequestPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordBeforeConfirmPasswordResetRequest
+onRecordBeforeConfirmPasswordResetRequest hook is triggered before each Record
+confirm password reset API request (after request data load and before persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordBeforeConfirmPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordBeforeConfirmPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordAfterConfirmPasswordResetRequest
+onRecordAfterConfirmPasswordResetRequest hook is triggered
+after each successful confirm password reset API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterConfirmPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordAfterConfirmPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordBeforeRequestVerificationRequest
+onRecordBeforeRequestVerificationRequest hook is triggered before each Record
+request verification API request (after request data load and before sending the verification email).
+Could be used to additionally validate the loaded request data or implement
+completely different verification behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordBeforeRequestVerificationRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordBeforeRequestVerificationRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordAfterRequestVerificationRequest
+onRecordAfterRequestVerificationRequest  hook is triggered
+after each successful request verification API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterRequestVerificationRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordAfterRequestVerificationRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordBeforeConfirmVerificationRequest
+onRecordBeforeConfirmVerificationRequest hook is triggered before each Record
+confirm verification API request (after request data load and before persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordBeforeConfirmVerificationRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordBeforeConfirmVerificationRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordAfterConfirmVerificationRequest
+onRecordAfterConfirmVerificationRequest hook is triggered after each
+successful confirm verification API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterConfirmVerificationRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordAfterConfirmVerificationRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordBeforeRequestEmailChangeRequest
+onRecordBeforeRequestEmailChangeRequest hook is triggered before each Record request email change API request
+(after request data load and before sending the email link to confirm the change).
+Could be used to additionally validate the request data or implement
+completely different request email change behavior.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordBeforeRequestEmailChangeRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordBeforeRequestEmailChangeRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+onRecordAfterRequestEmailChangeRequest
+onRecordAfterRequestEmailChangeRequest hook is triggered
+after each successful request email change API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth collection
+onRecordAfterRequestEmailChangeRequest(e) => {
+console.log(e.httpContext)
+console.log(e.record)
+// fires only for "users" and "managers" auth collections
+onRecordAfterRequestEmailChangeRequest((e) => {
+console.log(e.httpContext)
+console.log(e.record)
+}, "users", "managers")
+### Realtime API hooks
+onRealtimeConnectRequest
+`onRealtimeConnectRequest` hook is triggered right before establishing
+the SSE client connection.
+onRealtimeConnectRequest((e) => {
+console.log(e.httpContext)
+console.log(e.client.id())
+console.log(e.idleTimeout) // in nanosec
+onRealtimeDisconnectRequest
+`onRealtimeDisconnectRequest` hook is triggered on disconnected/interrupted
+SSE client connection.
+onRealtimeDisconnectRequest((e) => {
+console.log(e.httpContext)
+console.log(e.client.id())
+onRealtimeBeforeMessageSend
+onRealtimeBeforeMessageSend hook is triggered right before sending
+an SSE message to a client.
+Returning false will prevent sending the message.
+Returning any other error will close the realtime connection.
+onRealtimeBeforeMessageSend((e) => {
+console.log(e.httpContext)
+console.log(e.client.id())
+console.log(e.message)
+onRealtimeAfterMessageSend
+`onRealtimeAfterMessageSend` hook is triggered right after sending
+an SSE message to a client.
+onRealtimeAfterMessageSend((e) => {
+console.log(e.httpContext)
+console.log(e.client.id())
+console.log(e.message)
+onRealtimeBeforeSubscribeRequest
+`onRealtimeBeforeSubscribeRequest` hook is triggered before changing
+the client subscriptions, allowing you to further validate and
+modify the submitted change.
+onRealtimeBeforeSubscribeRequest((e) => {
+console.log(e.httpContext)
+console.log(e.client.id())
+console.log(e.subscriptions)
+onRealtimeAfterSubscribeRequest
+`onRealtimeAfterSubscribeRequest` hook is triggered after the client
+subscriptions were successfully changed.
+onRealtimeAfterSubscribeRequest((e) => {
+console.log(e.httpContext)
+console.log(e.client.id())
+console.log(e.subscriptions)
+### File API hooks
+Could be used to validate or modify the file response before returning it to the client.
+console.log(e.httpContext)
+console.log(e.record)
+console.log(e.fileField)
+console.log(e.servedPath)
+console.log(e.servedName)
+onFileBeforeTokenRequest
+onFileBeforeTokenRequest hook is triggered before each file
+token API request.
+If no token or model was submitted, e.Model and e.Token will be empty,
+allowing you to implement your own custom model file auth implementation.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth model
+onFileBeforeTokenRequest((e) => {
+console.log(e.httpContext)
+console.log(e.token)
+// fires only for "users"
+onFileBeforeTokenRequest((e) => {
+console.log(e.httpContext)
+console.log(e.token)
+}, "users")
+onFileAfterTokenRequest
+onFileAfterTokenRequest hook is triggered after each
+successful file token API request.
+If the optional "tags" list (Collection ids or names) is specified,
+then all event handlers registered via the created hook will be
+triggered and called only if their event data origin matches the tags.
+// fires for every auth model
+onFileAfterTokenRequest((e) => {
+console.log(e.httpContext)
+console.log(e.token)
+// fires only for "users"
+onFileAfterTokenRequest((e) => {
+console.log(e.httpContext)
+console.log(e.token)
+}, "users")
+### Collection API hooks
+onCollectionsListRequest
+`onCollectionsListRequest` hook is triggered on each API Collections list request.
+Could be used to validate or modify the response before returning it to the client.
+onCollectionsListRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collections)
+console.log(e.result)
+onCollectionViewRequest
+`onCollectionViewRequest` hook is triggered on each API Collection view request.
+Could be used to validate or modify the response before returning it to the client.
+onCollectionViewRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collection)
+onCollectionBeforeCreateRequest
+`onCollectionBeforeCreateRequest` hook is triggered before each API Collection
+create request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+onCollectionBeforeCreateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collection)
+onCollectionAfterCreateRequest
+`onCollectionAfterCreateRequest` hook is triggered after each
+successful API Collection create request.
+onCollectionAfterCreateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collection)
+onCollectionBeforeUpdateRequest
+`onCollectionBeforeUpdateRequest` hook is triggered before each API Collection
+update request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+onCollectionBeforeUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collection)
+onCollectionAfterUpdateRequest
+`onCollectionAfterUpdateRequest` hook is triggered after each
+successful API Collection update request.
+onCollectionAfterUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collection)
+onCollectionBeforeDeleteRequest
+`onCollectionBeforeDeleteRequest` hook is triggered before each API
+Collection delete request (after model load and before actual deletion).
+Could be used to additionally validate the request data or implement
+completely different delete behavior.
+onCollectionBeforeDeleteRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collection)
+onCollectionAfterDeleteRequest
+`onCollectionAfterDeleteRequest` hook is triggered after each
+successful API Collection delete request.
+onCollectionAfterDeleteRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collection)
+onCollectionsBeforeImportRequest
+`onCollectionsBeforeImportRequest` hook is triggered before each API
+collections import request (after request data load and before the actual import).
+Could be used to additionally validate the imported collections or
+to implement completely different import behavior.
+onCollectionsBeforeImportRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collections)
+onCollectionsAfterImportRequest
+`onCollectionsAfterImportRequest` hook is triggered after each
+successful API collections import request.
+onCollectionsAfterImportRequest((e) => {
+console.log(e.httpContext)
+console.log(e.collections)
+### Settings API hooks
+onSettingsListRequest
+`onSettingsListRequest` hook is triggered on each successful
+API Settings list request.
+Could be used to validate or modify the response before
+returning it to the client.
+onSettingsListRequest((e) => {
+console.log(e.httpContext)
+console.log(e.redactedSettings)
+onSettingsBeforeUpdateRequest
+`onSettingsBeforeUpdateRequest` hook is triggered on each successful
+API Settings list request.
+Could be used to validate or modify the response before
+returning it to the client.
+onSettingsBeforeUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.oldSettings)
+console.log(e.newSettings)
+onSettingsAfterUpdateRequest
+`onSettingsAfterUpdateRequest` hook is triggered after each
+successful API Settings update request.
+onSettingsAfterUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.oldSettings)
+console.log(e.newSettings)
+### Admin CRUD API hooks
+onAdminsListRequest
+`onAdminsListRequest` hook is triggered on each API Admins list request.
+Could be used to validate or modify the response before returning it to the client.
+onAdminsListRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admins)
+console.log(e.result)
+onAdminViewRequest
+`onAdminViewRequest` hook is triggered on each API Admin view request.
+Could be used to validate or modify the response before returning it to the client.
+onAdminViewRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminBeforeCreateRequest
+`onAdminBeforeCreateRequest` hook is triggered before each API
+Admin create request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+onAdminBeforeCreateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminAfterCreateRequest
+`onAdminAfterCreateRequest` hook is triggered after each
+successful API Admin create request.
+onAdminAfterCreateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminBeforeUpdateRequest
+`onAdminBeforeUpdateRequest` hook is triggered before each API
+Admin update request (after request data load and before model persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+onAdminBeforeUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminAfterUpdateRequest
+`onAdminAfterUpdateRequest` hook is triggered after each
+successful API Admin update request.
+onAdminAfterUpdateRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminBeforeDeleteRequest
+`onAdminBeforeDeleteRequest` hook is triggered before each API
+Admin delete request (after model load and before actual deletion).
+Could be used to additionally validate the request data or implement
+completely different delete behavior.
+onAdminBeforeDeleteRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminAfterDeleteRequest
+`onAdminAfterDeleteRequest` hook is triggered after each
+successful API Admin delete request.
+onAdminAfterDeleteRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+### Admin Auth API hooks
+onAdminAuthRequest
+`onAdminAuthRequest` hook is triggered on each successful API Admin
+authentication request (sign-in, token refresh, etc.).
+Could be used to additionally validate or modify the
+authenticated admin data and token.
+onAdminAuthRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+console.log(e.token)
+onAdminBeforeAuthWithPasswordRequest
+`onAdminBeforeAuthWithPasswordRequest` hook is triggered before each Admin
+auth with password API request (after request data load and before password validation).
+Could be used to implement for example a custom password validation
+or to locate a different Admin identity (by assigning `AdminAuthWithPasswordEvent.Admin`).
+onAdminBeforeAuthWithPasswordRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+console.log(e.identity)
+console.log(e.password)
+onAdminAfterAuthWithPasswordRequest
+`onAdminAfterAuthWithPasswordRequest` hook is triggered after each
+successful Admin auth with password API request.
+onAdminAfterAuthWithPasswordRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+console.log(e.identity)
+console.log(e.password)
+onAdminBeforeAuthRefreshRequest
+`onAdminBeforeAuthRefreshRequest` hook is triggered before each Admin
+auth refresh API request (right before generating a new auth token).
+Could be used to additionally validate the request data or implement
+completely different auth refresh behavior.
+onAdminBeforeAuthRefreshRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminAfterAuthRefreshRequest
+`onAdminAfterAuthRefreshRequest` hook is triggered after each
+successful auth refresh API request (right after generating a new auth token).
+onAdminAfterAuthRefreshRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminBeforeRequestPasswordResetRequest
+`onAdminBeforeRequestPasswordResetRequest` hook is triggered before each Admin
+request password reset API request (after request data load and before sending the reset email).
+Could be used to additionally validate the request data or implement
+completely different password reset behavior.
+onAdminBeforeRequestPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminAfterRequestPasswordResetRequest
+`onAdminAfterRequestPasswordResetRequest` hook is triggered after each
+successful request password reset API request.
+onAdminBeforeRequestPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminBeforeConfirmPasswordResetRequest
+`onAdminBeforeConfirmPasswordResetRequest` hook is triggered before each Admin
+confirm password reset API request (after request data load and before persistence).
+Could be used to additionally validate the request data or implement
+completely different persistence behavior.
+onAdminBeforeConfirmPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
+onAdminAfterConfirmPasswordResetRequest
+`onAdminAfterConfirmPasswordResetRequest` hook is triggered after each
+successful confirm password reset API request.
+onAdminAfterConfirmPasswordResetRequest((e) => {
+console.log(e.httpContext)
+console.log(e.admin)
