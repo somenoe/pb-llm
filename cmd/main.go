@@ -11,7 +11,8 @@ import (
 
 func main() {
 	var (
-		help = flag.Bool("help", false, "Show help message")
+		help  = flag.Bool("help", false, "Show help message")
+		debug = flag.Bool("d", false, "Debug mode - only fetch first 3 websites per category (12 total)")
 	)
 	flag.Parse()
 
@@ -20,19 +21,22 @@ func main() {
 		return
 	}
 
-	runScraper()
+	runScraper(*debug)
 }
 
-func runScraper() {
+func runScraper(debug bool) {
 	fmt.Println("🚀 PocketBase Documentation Scraper for LLMs")
 	fmt.Println("===========================================")
+	if debug {
+		fmt.Println("🐛 DEBUG MODE - ONLY FETCHING FIRST 3 WEBSITES PER CATEGORY (12 TOTAL)")
+	}
 	fmt.Println("📦 Generating 4 variations: Full, Go-only, JS-only, Core-only")
 	fmt.Println("📦 Each in 2 formats: MD (ultra-compact) and TXT")
 
 	s := scraper.New()
 
 	fmt.Println("📥 Scraping all sections once (smart optimization)...")
-	allDocs, err := s.ScrapeAll("both")
+	allDocs, err := s.ScrapeAll("both", debug)
 	if err != nil {
 		log.Fatalf("❌ Scraping failed: %v", err)
 	}
@@ -112,6 +116,8 @@ func printHelp() {
 	OPTIONS:
 	  -help
 	        Show this help message
+	  -d
+	        Debug mode - only fetch first 3 websites per category (12 total)
 
 	OUTPUT FORMATS:
 	  • .md - Ultra-compact markdown format optimized for LLM token efficiency
@@ -136,6 +142,7 @@ func printHelp() {
 
 	EXAMPLE:
 	  go run cmd/main.go                      # Generates all 4 variations
+	  go run cmd/main.go -d                   # Debug mode - 3 per category (12 total)
 
 	All files saved in timestamped docs/session_YYYY-MM-DD_HH-MM-SS.mmm/ directory`
 

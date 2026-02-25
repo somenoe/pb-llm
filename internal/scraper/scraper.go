@@ -27,6 +27,7 @@ const (
 )
 
 var docSections = []types.DocSection{
+	// General
 	{Title: "Introduction", URL: "https://pocketbase.io/old/docs/", Category: types.CategoryGeneral},
 	{Title: "Collections", URL: "https://pocketbase.io/old/docs/collections/", Category: types.CategoryGeneral},
 	{Title: "Client-side SDKs", URL: "https://pocketbase.io/old/docs/client-side-sdks/", Category: types.CategoryGeneral},
@@ -92,8 +93,26 @@ func New() *Scraper {
 	}
 }
 
-func (s *Scraper) ScrapeAll(extensions string) ([]types.DocSection, error) {
+func (s *Scraper) ScrapeAll(extensions string, debug bool) ([]types.DocSection, error) {
 	filteredSections := s.filterSectionsByExtensions(docSections, extensions)
+
+	// In debug mode, only process first 3 sections per category
+	if debug {
+		categoryMap := make(map[types.DocumentCategory][]types.DocSection)
+		for _, section := range filteredSections {
+			categoryMap[section.Category] = append(categoryMap[section.Category], section)
+		}
+
+		var limitedSections []types.DocSection
+		for _, sections := range categoryMap {
+			if len(sections) > 3 {
+				limitedSections = append(limitedSections, sections[:3]...)
+			} else {
+				limitedSections = append(limitedSections, sections...)
+			}
+		}
+		filteredSections = limitedSections
+	}
 
 	fmt.Printf("🚀 Starting PocketBase documentation scraping...\n")
 	fmt.Printf("📝 Processing %d sections (filtered for %s extensions)\n\n", len(filteredSections), extensions)
