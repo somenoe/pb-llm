@@ -5,11 +5,11 @@ set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 default:
     just build
 
-build:
-    go build ./cmd/main.go
+build *FLAGS:
+    go build ./cmd/main.go {{ FLAGS }}
 
-run:
-    go run ./cmd/main.go
+run *FLAGS:
+    go run ./cmd/main.go {{ FLAGS }}
 
-lint:
-    golangci-lint run
+lint *FLAGS:
+    golangci-lint run {{ FLAGS }}
