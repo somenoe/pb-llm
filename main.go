@@ -18,6 +18,8 @@ type config struct {
 	debugAmount int
 	target      string
 	targets     map[types.DocumentCategory]struct{}
+	output      string
+	folderMode  bool
 }
 
 func main() {
@@ -36,6 +38,17 @@ func main() {
 				Aliases: []string{"t"},
 				Usage:   "Target category: all|general|api|go|js (comma-separated supported)",
 				Value:   "all",
+			},
+			&cli.StringFlag{
+				Name:    "output",
+				Aliases: []string{"o"},
+				Usage:   "Output type: all|txt|md",
+				Value:   "all",
+			},
+			&cli.BoolFlag{
+				Name:    "folder",
+				Aliases: []string{"f"},
+				Usage:   "Save one file per page into a variation folder",
 			},
 		},
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -58,6 +71,8 @@ func parseConfig(c *cli.Command) (config, error) {
 
 	cfg.debugAmount = c.Int("debug")
 	cfg.target = c.String("target")
+	cfg.output = strings.ToLower(strings.TrimSpace(c.String("output")))
+	cfg.folderMode = c.Bool("folder")
 
 	if cfg.debugAmount < 0 {
 		return cfg, fmt.Errorf("debug amount must be >= 0")
@@ -68,6 +83,10 @@ func parseConfig(c *cli.Command) (config, error) {
 		return cfg, err
 	}
 	cfg.targets = targets
+
+	if _, err := parseOutputFormats(cfg.output); err != nil {
+		return cfg, err
+	}
 
 	if len(c.Args().Slice()) > 0 {
 		return cfg, fmt.Errorf("unexpected arguments: %s", strings.Join(c.Args().Slice(), " "))
@@ -124,7 +143,10 @@ func runScraper(cfg config) error {
 	}
 	fmt.Printf("🎯 Target categories: %s\n", formatTargets(cfg.targets))
 	fmt.Println("📦 Generating 4 variations: Full, Go-only, JS-only, Core-only")
-	fmt.Println("📦 Each in 2 formats: MD (ultra-compact) and TXT")
+	fmt.Printf("📦 Output format(s): %s\n", cfg.output)
+	if cfg.folderMode {
+		fmt.Println("📁 Folder mode: enabled (one file per page)")
+	}
 
 	s := scraper.New()
 
@@ -150,17 +172,28 @@ func runScraper(cfg config) error {
 
 	fmt.Printf("💾 Saving all variations to: docs/%s/\n\n", sessionDir)
 
+	formats, err := parseOutputFormats(cfg.output)
+	if err != nil {
+		return err
+	}
+
 	for _, variation := range variations {
 		fmt.Printf("🎯 Processing %s variation (%s)...\n", variation.name, variation.desc)
 
 		filteredDocs := s.FilterDocsByExtensions(allDocs, variation.extension)
 		fmt.Printf("   📊 %d sections included\n", len(filteredDocs))
 
-		formats := []string{"md", "txt"}
-		fileExtensions := []string{".md", ".txt"}
+		for _, format := range formats {
+			if cfg.folderMode {
+				if err := s.SaveDocsToFolder(filteredDocs, sessionDir, variation.name, format); err != nil {
+					fmt.Printf("⚠️ Failed to save %s folder (%s): %v\n", variation.name, format, err)
+				} else {
+					fmt.Printf("   ✅ %s/ (%s)\n", variation.name, format)
+				}
+				continue
+			}
 
-		for i, format := range formats {
-			outputFile := fmt.Sprintf("pocketbase_docs_%s%s", variation.name, fileExtensions[i])
+			outputFile := fmt.Sprintf("pocketbase_docs_%s.%s", variation.name, format)
 			if err := s.SaveToFile(filteredDocs, sessionDir, outputFile, format); err != nil {
 				fmt.Printf("⚠️ Failed to save %s %s format: %v\n", variation.name, format, err)
 			} else {
@@ -180,11 +213,12 @@ func runScraper(cfg config) error {
 
 	fmt.Printf("🎉 All variations generated successfully!\n")
 	fmt.Printf("📁 Session directory: docs/%s/\n\n", sessionDir)
-	fmt.Printf("📄 Available files:\n")
-	fmt.Printf("   • pocketbase_docs_full.md/.txt - Complete documentation (ultra-compact)\n")
-	fmt.Printf("   • pocketbase_docs_go.md/.txt - Go extensions only (ultra-compact)\n")
-	fmt.Printf("   • pocketbase_docs_js.md/.txt - JavaScript extensions only (ultra-compact)\n")
-	fmt.Printf("   • pocketbase_docs_core.md/.txt - Core PocketBase only (ultra-compact)\n")
+	fmt.Printf("📄 Output generated for formats: %s\n", strings.Join(formats, ", "))
+	if cfg.folderMode {
+		fmt.Printf("   • full/, go/, js/, core/ - One file per page\n")
+	} else {
+		fmt.Printf("   • pocketbase_docs_full.*, pocketbase_docs_go.*, pocketbase_docs_js.*, pocketbase_docs_core.*\n")
+	}
 	fmt.Printf("   • summary_*.txt - Individual statistics for each variation\n\n")
 	fmt.Printf("🤖 Pick the variation that matches your needs!\n")
 	fmt.Printf("💡 .md format is now ultra-compact for maximum token efficiency!\n")
@@ -213,4 +247,15 @@ func formatTargets(targets map[types.DocumentCategory]struct{}) string {
 
 	sort.Strings(result)
 	return strings.Join(result, ", ")
+}
+
+func parseOutputFormats(output string) ([]string, error) {
+	switch output {
+	case "", "all":
+		return []string{"md", "txt"}, nil
+	case "md", "txt":
+		return []string{output}, nil
+	default:
+		return nil, fmt.Errorf("invalid output %q (use all|txt|md)", output)
+	}
 }

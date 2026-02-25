@@ -33,6 +33,11 @@ PocketBase Documentation Scraper for LLM Usage
 	  -t, --target CATEGORY
 	        Target categories: all|general|api|go|js
 	        Comma-separated values are supported (example: api,go)
+	  -o, --output TYPE
+	        Output type: all|txt|md
+	  -f, --folder
+	        Save one file per page in per-variation folders with sanitized page titles
+	        (example: js/Introduction.md, go/Go_Overview.md)
 
 	OUTPUT FORMATS:
 	  • .llm.md - Ultra-compact LLM format for maximum token efficiency
@@ -60,6 +65,9 @@ PocketBase Documentation Scraper for LLM Usage
 	  go run cmd/main.go -d 2                 # Debug mode - 2 per selected category
 	  go run cmd/main.go -t api               # Target API category only
 	  go run cmd/main.go -t api,go -d 2       # Target API + Go, debug mode
+	  go run cmd/main.go -o md                # Only markdown output
+	  go run cmd/main.go -o txt               # Only text output
+	  go run cmd/main.go -o md -f -t js       # Folder mode with titled files (js/Introduction.md, js/Authentication.md, ...)
 
 	All files saved in timestamped docs/session_YYYY-MM-DD_HH-MM-SS.mmm/ directory
 ```

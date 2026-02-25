@@ -991,6 +991,131 @@ func (s *Scraper) SaveToFile(docs []types.DocSection, sessionDir, filename, form
 	return s.writeFile(filepath, data)
 }
 
+// sanitizeFilename converts a page title to a Windows-safe filename
+// It removes invalid characters, handles duplicates with numeric prefixes
+func sanitizeFilename(title string) string {
+	// Replace/remove Windows-invalid characters: < > : " / \ | ? *
+	invalidChars := map[rune]rune{
+		'<':  '_',
+		'>':  '_',
+		':':  '_',
+		'"':  '_',
+		'/':  '_',
+		'\\': '_',
+		'|':  '_',
+		'?':  '_',
+		'*':  '_',
+	}
+
+	var result strings.Builder
+	for _, r := range strings.TrimSpace(title) {
+		if replacement, ok := invalidChars[r]; ok {
+			result.WriteRune(replacement)
+		} else {
+			result.WriteRune(r)
+		}
+	}
+
+	filename := result.String()
+
+	// Replace multiple consecutive underscores/spaces with single underscore
+	filename = regexp.MustCompile(`[\s_]+`).ReplaceAllString(filename, "_")
+
+	// Trim leading/trailing underscores
+	filename = strings.Trim(filename, "_")
+
+	// Handle empty filename edge case
+	if filename == "" {
+		filename = "untitled"
+	}
+
+	// Truncate to Windows MAX_PATH safe length (255 chars for filename component)
+	if len(filename) > 200 {
+		filename = filename[:200]
+	}
+
+	return filename
+}
+
+// buildFilenameMap creates a map of sanitized filenames with duplicate handling
+// Returns map of doc title -> final filename (with numeric prefix if needed)
+func (s *Scraper) buildFilenameMap(docs []types.DocSection) map[string]string {
+	filenameMap := make(map[string]string)
+	filenameCount := make(map[string]int)
+
+	for _, doc := range docs {
+		if !doc.Success {
+			continue
+		}
+
+		sanitized := sanitizeFilename(doc.Title)
+		filenameCount[sanitized]++
+	}
+
+	// Second pass: assign final filenames with numeric prefixes for duplicates
+	numberAssigned := make(map[string]int)
+
+	for _, doc := range docs {
+		if !doc.Success {
+			continue
+		}
+
+		sanitized := sanitizeFilename(doc.Title)
+
+		// Add numeric prefix if there are duplicates
+		if filenameCount[sanitized] > 1 {
+			numberAssigned[sanitized]++
+			filenameMap[doc.Title] = fmt.Sprintf("%02d_%s", numberAssigned[sanitized], sanitized)
+		} else {
+			filenameMap[doc.Title] = sanitized
+		}
+	}
+
+	return filenameMap
+}
+
+func (s *Scraper) SaveDocsToFolder(docs []types.DocSection, sessionDir, folderName, format string) error {
+	if err := s.ensureSessionDir(sessionDir); err != nil {
+		return err
+	}
+
+	folderPath := fmt.Sprintf("docs/%s/%s", sessionDir, folderName)
+	if err := os.MkdirAll(folderPath, 0755); err != nil {
+		return fmt.Errorf("error creating folder %q: %w", folderPath, err)
+	}
+
+	// Build filename map with sanitized titles and duplicate handling
+	filenameMap := s.buildFilenameMap(docs)
+
+	formatter := formatter.GetFormatter(format)
+
+	for _, doc := range docs {
+		if !doc.Success {
+			continue
+		}
+
+		var data []byte
+		var err error
+		if format == "txt" {
+			data, err = formatter.FormatText([]types.DocSection{doc})
+		} else {
+			data, err = formatter.FormatCompact([]types.DocSection{doc})
+		}
+		if err != nil {
+			return fmt.Errorf("error formatting %q: %w", doc.Title, err)
+		}
+
+		// Use sanitized title from map
+		sanitizedName := filenameMap[doc.Title]
+		filename := fmt.Sprintf("%s.%s", sanitizedName, format)
+		if err := s.writeFile(fmt.Sprintf("%s/%s", folderPath, filename), data); err != nil {
+			return fmt.Errorf("error writing %q: %w", doc.Title, err)
+		}
+	}
+
+	return nil
+}
+
 func (s *Scraper) SaveSummaryToFile(docs []types.DocSection, sessionDir, filename string) error {
 	if err := s.ensureSessionDir(sessionDir); err != nil {
 		return err
