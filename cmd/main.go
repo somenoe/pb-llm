@@ -11,8 +11,8 @@ import (
 
 func main() {
 	var (
-		help  = flag.Bool("help", false, "Show help message")
-		debug = flag.Bool("d", false, "Debug mode - only fetch first 3 websites per category (12 total)")
+		help        = flag.Bool("help", false, "Show help message")
+		debugAmount = flag.Int("d", 0, "Debug mode - number of websites per category to fetch (0 = disabled, default: 1)")
 	)
 	flag.Parse()
 
@@ -21,14 +21,14 @@ func main() {
 		return
 	}
 
-	runScraper(*debug)
+	runScraper(*debugAmount)
 }
 
-func runScraper(debug bool) {
+func runScraper(debugAmount int) {
 	fmt.Println("🚀 PocketBase Documentation Scraper for LLMs")
 	fmt.Println("===========================================")
-	if debug {
-		fmt.Println("🐛 DEBUG MODE - ONLY FETCHING FIRST 3 WEBSITES PER CATEGORY (12 TOTAL)")
+	if debugAmount > 0 {
+		fmt.Printf("🐛 DEBUG MODE - FETCHING FIRST %d WEBSITES PER CATEGORY (%d TOTAL)\n", debugAmount, debugAmount*4)
 	}
 	fmt.Println("📦 Generating 4 variations: Full, Go-only, JS-only, Core-only")
 	fmt.Println("📦 Each in 2 formats: MD (ultra-compact) and TXT")
@@ -36,7 +36,7 @@ func runScraper(debug bool) {
 	s := scraper.New()
 
 	fmt.Println("📥 Scraping all sections once (smart optimization)...")
-	allDocs, err := s.ScrapeAll("both", debug)
+	allDocs, err := s.ScrapeAll("both", debugAmount)
 	if err != nil {
 		log.Fatalf("❌ Scraping failed: %v", err)
 	}
@@ -116,8 +116,8 @@ func printHelp() {
 	OPTIONS:
 	  -help
 	        Show this help message
-	  -d
-	        Debug mode - only fetch first 3 websites per category (12 total)
+	  -d AMOUNT
+	        Debug mode - fetch AMOUNT websites per category (0 = disabled, default: 1)
 
 	OUTPUT FORMATS:
 	  • .md - Ultra-compact markdown format optimized for LLM token efficiency
@@ -142,7 +142,9 @@ func printHelp() {
 
 	EXAMPLE:
 	  go run cmd/main.go                      # Generates all 4 variations
-	  go run cmd/main.go -d                   # Debug mode - 3 per category (12 total)
+	  go run cmd/main.go -d 1                 # Debug mode - 1 per category (4 total)
+	  go run cmd/main.go -d 3                 # Debug mode - 3 per category (12 total)
+	  go run cmd/main.go -d 5                 # Debug mode - 5 per category (20 total)
 
 	All files saved in timestamped docs/session_YYYY-MM-DD_HH-MM-SS.mmm/ directory`
 
