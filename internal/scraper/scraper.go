@@ -93,8 +93,9 @@ func New() *Scraper {
 	}
 }
 
-func (s *Scraper) ScrapeAll(extensions string, debugAmount int) ([]types.DocSection, error) {
+func (s *Scraper) ScrapeAll(extensions string, debugAmount int, targets map[types.DocumentCategory]struct{}) ([]types.DocSection, error) {
 	filteredSections := s.filterSectionsByExtensions(docSections, extensions)
+	filteredSections = s.filterSectionsByTargets(filteredSections, targets)
 
 	// In debug mode (debugAmount > 0), limit to N sections per category
 	if debugAmount > 0 {
@@ -139,6 +140,21 @@ func (s *Scraper) ScrapeAll(extensions string, debugAmount int) ([]types.DocSect
 	}
 
 	return results, nil
+}
+
+func (s *Scraper) filterSectionsByTargets(sections []types.DocSection, targets map[types.DocumentCategory]struct{}) []types.DocSection {
+	if len(targets) == 0 {
+		return sections
+	}
+
+	filtered := make([]types.DocSection, 0, len(sections))
+	for _, section := range sections {
+		if _, ok := targets[section.Category]; ok {
+			filtered = append(filtered, section)
+		}
+	}
+
+	return filtered
 }
 
 func (s *Scraper) filterSectionsByExtensions(sections []types.DocSection, extensions string) []types.DocSection {

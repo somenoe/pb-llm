@@ -6,10 +6,10 @@ default:
     just build
 
 build *FLAGS:
-    go build ./cmd/main.go {{ FLAGS }}
+    go build . {{ FLAGS }}
 
 run *FLAGS:
-    go run ./cmd/main.go {{ FLAGS }}
+    go run . {{ FLAGS }}
 
 lint *FLAGS:
     golangci-lint run {{ FLAGS }}

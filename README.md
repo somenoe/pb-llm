@@ -26,8 +26,13 @@ PocketBase Documentation Scraper for LLM Usage
 	  go run cmd/main.go [OPTIONS]
 
 	OPTIONS:
-	  -help
+	  -h, --help
 	        Show this help message
+	  -d, --debug AMOUNT
+	        Debug mode - fetch AMOUNT websites per selected category (0 = disabled)
+	  -t, --target CATEGORY
+	        Target categories: all|general|api|go|js
+	        Comma-separated values are supported (example: api,go)
 
 	OUTPUT FORMATS:
 	  • .llm.md - Ultra-compact LLM format for maximum token efficiency
@@ -52,6 +57,9 @@ PocketBase Documentation Scraper for LLM Usage
 
 	EXAMPLE:
 	  go run cmd/main.go                      # Generates all 4 variations
+	  go run cmd/main.go -d 2                 # Debug mode - 2 per selected category
+	  go run cmd/main.go -t api               # Target API category only
+	  go run cmd/main.go -t api,go -d 2       # Target API + Go, debug mode
 
 	All files saved in timestamped docs/session_YYYY-MM-DD_HH-MM-SS.mmm/ directory
 ```
