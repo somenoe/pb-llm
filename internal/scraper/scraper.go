@@ -11,6 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	"pb-llm/internal/formatter"
 	"pb-llm/internal/summary"
 	"pb-llm/internal/types"
@@ -721,7 +724,7 @@ func (s *Scraper) createCleanContent(section types.DocSection) string {
 		buffer.WriteString("## Examples\n\n")
 		for key, example := range section.Examples {
 			lang := strings.Split(key, "_")[0]
-			buffer.WriteString(fmt.Sprintf("### %s\n\n```%s\n%s\n```\n\n", strings.Title(lang), lang, example))
+			buffer.WriteString(fmt.Sprintf("### %s\n\n```%s\n%s\n```\n\n", cases.Title(language.Und).String(lang), lang, example))
 		}
 	}
 
