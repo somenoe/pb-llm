@@ -6,6 +6,16 @@ import (
 	"unicode"
 )
 
+// DocumentCategory represents the category of a documentation section
+type DocumentCategory string
+
+const (
+	CategoryGeneral      DocumentCategory = "general"
+	CategoryAPI          DocumentCategory = "api"
+	CategoryJSExtensions DocumentCategory = "js-extensions"
+	CategoryGoExtensions DocumentCategory = "go-extensions"
+)
+
 type DocSection struct {
 	Title            string            `json:"title"`
 	URL              string            `json:"url"`
@@ -16,7 +26,7 @@ type DocSection struct {
 	Parameters       []Parameter       `json:"parameters,omitempty"`
 	Examples         map[string]string `json:"examples,omitempty"`
 	Description      string            `json:"description"`
-	Category         string            `json:"category"`
+	Category         DocumentCategory  `json:"category"`
 	Headers          []string          `json:"headers,omitempty"`
 	ResponseExamples []ResponseExample `json:"response_examples,omitempty"`
 	Success          bool              `json:"success"`
@@ -40,7 +50,7 @@ type ResponseExample struct {
 type SimplifiedDoc struct {
 	Title        string            `json:"title"`
 	URL          string            `json:"url"`
-	Category     string            `json:"category"`
+	Category     DocumentCategory  `json:"category"`
 	Description  string            `json:"description"`
 	APIRoute     string            `json:"api_route,omitempty"`
 	Method       string            `json:"method,omitempty"`

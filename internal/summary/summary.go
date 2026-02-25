@@ -190,7 +190,7 @@ func (g *Generator) calculateComprehensiveStats(docs []types.DocSection) types.S
 				}
 			}
 
-			category := strings.Title(doc.Category)
+			category := strings.Title(string(doc.Category))
 			categoryTokens[category] += tokenStats.LLMUsable
 			categoryCounts[category]++
 		} else {
@@ -259,7 +259,7 @@ func (g *Generator) GetCategoryBreakdown(docs []types.DocSection) map[string]int
 	categoryCount := make(map[string]int)
 	for _, doc := range docs {
 		if doc.Success {
-			categoryCount[strings.Title(doc.Category)]++
+			categoryCount[strings.Title(string(doc.Category))]++
 		}
 	}
 	return categoryCount
