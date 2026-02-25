@@ -1,90 +1,63 @@
 package main
 
 import (
-	"flag"
+	"context"
 	"fmt"
 	"os"
 	"sort"
 	"strings"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	"github.com/urfave/cli/v3"
 
 	"pb-llm/internal/scraper"
 	"pb-llm/internal/types"
 )
 
 type config struct {
-	help        bool
 	debugAmount int
 	target      string
 	targets     map[types.DocumentCategory]struct{}
 }
 
-type scrapeDoneMsg struct {
-	err error
-}
-
-type model struct {
-	config config
-	err    error
-}
-
 func main() {
-	cfg, err := parseFlags(os.Args[1:])
-	if err != nil {
-		fmt.Printf("❌ %v\n\n", err)
-		printHelp()
-		os.Exit(2)
+	cmd := &cli.Command{
+		Name:  "pb-llm",
+		Usage: "Scrape PocketBase documentation and generate LLM-friendly outputs",
+		Flags: []cli.Flag{
+			&cli.IntFlag{
+				Name:    "debug",
+				Aliases: []string{"d"},
+				Usage:   "Debug mode - number of websites per category to fetch (0 = disabled)",
+				Value:   0,
+			},
+			&cli.StringFlag{
+				Name:    "target",
+				Aliases: []string{"t"},
+				Usage:   "Target category: all|general|api|go|js (comma-separated supported)",
+				Value:   "all",
+			},
+		},
+		Action: func(ctx context.Context, c *cli.Command) error {
+			cfg, err := parseConfig(c)
+			if err != nil {
+				return err
+			}
+			return runScraper(cfg)
+		},
 	}
 
-	if cfg.help {
-		printHelp()
-		return
-	}
-
-	p := tea.NewProgram(model{config: cfg}, tea.WithoutRenderer())
-	finalModel, runErr := p.Run()
-	if runErr != nil {
-		fmt.Printf("❌ Bubble Tea runtime error: %v\n", runErr)
-		os.Exit(1)
-	}
-
-	appModel, ok := finalModel.(model)
-	if !ok {
-		fmt.Println("❌ Unexpected program model type")
-		os.Exit(1)
-	}
-
-	if appModel.err != nil {
-		fmt.Printf("❌ %v\n", appModel.err)
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
+		fmt.Printf("❌ %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func parseFlags(args []string) (config, error) {
+func parseConfig(c *cli.Command) (config, error) {
 	var cfg config
 
-	fs := flag.NewFlagSet("pb-llm", flag.ContinueOnError)
-	fs.SetOutput(os.Stderr)
-	fs.BoolVar(&cfg.help, "h", false, "Show help message")
-	fs.BoolVar(&cfg.help, "help", false, "Show help message")
-	fs.IntVar(&cfg.debugAmount, "d", 0, "Debug mode - number of websites per category to fetch (0 = disabled)")
-	fs.IntVar(&cfg.debugAmount, "debug", 0, "Debug mode - number of websites per category to fetch (0 = disabled)")
-	fs.StringVar(&cfg.target, "t", "all", "Target category: all|general|api|go|js")
-	fs.StringVar(&cfg.target, "target", "all", "Target category: all|general|api|go|js")
-
-	if err := fs.Parse(args); err != nil {
-		if err == flag.ErrHelp {
-			cfg.help = true
-			return cfg, nil
-		}
-		return cfg, err
-	}
-
-	if len(fs.Args()) > 0 {
-		return cfg, fmt.Errorf("unexpected arguments: %s", strings.Join(fs.Args(), " "))
-	}
+	cfg.debugAmount = c.Int("debug")
+	cfg.target = c.String("target")
 
 	if cfg.debugAmount < 0 {
 		return cfg, fmt.Errorf("debug amount must be >= 0")
@@ -95,6 +68,10 @@ func parseFlags(args []string) (config, error) {
 		return cfg, err
 	}
 	cfg.targets = targets
+
+	if len(c.Args().Slice()) > 0 {
+		return cfg, fmt.Errorf("unexpected arguments: %s", strings.Join(c.Args().Slice(), " "))
+	}
 
 	return cfg, nil
 }
@@ -137,35 +114,6 @@ func parseTargets(targetArg string) (map[types.DocumentCategory]struct{}, error)
 	}
 
 	return targets, nil
-}
-
-func (m model) Init() tea.Cmd {
-	return runScraperCmd(m.config)
-}
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch typed := msg.(type) {
-	case scrapeDoneMsg:
-		m.err = typed.err
-		return m, tea.Quit
-	case tea.KeyMsg:
-		switch typed.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		}
-	}
-
-	return m, nil
-}
-
-func (m model) View() string {
-	return ""
-}
-
-func runScraperCmd(cfg config) tea.Cmd {
-	return func() tea.Msg {
-		return scrapeDoneMsg{err: runScraper(cfg)}
-	}
 }
 
 func runScraper(cfg config) error {
@@ -265,61 +213,4 @@ func formatTargets(targets map[types.DocumentCategory]struct{}) string {
 
 	sort.Strings(result)
 	return strings.Join(result, ", ")
-}
-
-func printHelp() {
-	const helpText = `PocketBase Documentation Scraper for LLM Usage
-	=============================================
-
-	DESCRIPTION:
-	  Scrapes PocketBase documentation and automatically generates 4 variations:
-	  • Full - Complete documentation with all extensions
-	  • Go-only - Go extensions only (backend development)
-	  • JS-only - JavaScript extensions only (frontend development)
-	  • Core-only - Core PocketBase without any extensions
-
-	  Each variation is generated in ultra-compact markdown and plain text formats.
-
-	USAGE:
-	  go run cmd/main.go [OPTIONS]
-
-	OPTIONS:
-	  -h, --help
-	        Show this help message
-	  -d, --debug AMOUNT
-	        Debug mode - fetch AMOUNT websites per category (0 = disabled, default: 0)
-	  -t, --target CATEGORY
-	        Target categories: all|general|api|go|js
-	        Comma-separated values are supported (for example: api,go)
-
-	OUTPUT FORMATS:
-	  • .md - Ultra-compact markdown format optimized for LLM token efficiency
-	  • .txt - Plain text format for general use
-
-	FEATURES:
-	  🤖 LLM-optimized output format
-	  📊 Token counting and estimation
-	  📈 Context window usage analysis
-	  🔧 AI training dataset structure
-	  📝 Comprehensive LLM usage statistics
-	  📄 Plain text backup format
-	  🎯 Automatic generation of all variations
-	  📦 Pick exactly what you need
-
-	OUTPUT (4 variations × 2 formats = 8 documentation files):
-	  • pocketbase_docs_full.llm.md/.txt - Complete documentation
-	  • pocketbase_docs_go.llm.md/.txt - Go extensions only
-	  • pocketbase_docs_js.llm.md/.txt - JavaScript extensions only
-	  • pocketbase_docs_core.llm.md/.txt - Core PocketBase only
-	  • summary_*.txt - Individual statistics for each variation
-
-	EXAMPLE:
-	  go run cmd/main.go                      # Generates all 4 variations
-	  go run cmd/main.go -d 1                 # Debug mode - 1 per selected category
-	  go run cmd/main.go -t api               # Scrape API docs only
-	  go run cmd/main.go -t api,go -d 2       # API + Go targets, debug=2
-
-	All files saved in timestamped docs/session_YYYY-MM-DD_HH-MM-SS.mmm/ directory`
-
-	fmt.Println(helpText)
 }
